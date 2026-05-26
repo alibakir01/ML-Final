@@ -1,0 +1,7 @@
+{
+  "DecisionTree": 0.0,
+  "RandomForest": 0.0,
+  "GradientBoosting": 0.22306429778739487,
+  "XGBoostV3": 0.6484163990841694,
+  "MLP": 0.1285193031284358
+}
