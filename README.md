@@ -18,8 +18,15 @@ Airbnb-K353/
 │   ├── reserve_2016Q3_train.csv
 │   └── PropertyID_test.csv
 ├── notebooks/
-│   └── 01_EDA.ipynb       # Exploratory Data Analysis
-├── outputs/               # plots, submissions
+│   ├── 01_EDA.ipynb                       # Exploratory Data Analysis
+│   ├── 02_FeatureEngineering.ipynb        # Column Aggregation, NLP, Clustering
+│   ├── 03_Linear_Baseline.ipynb           # Model Family 1: Linear Regression
+│   ├── 04_Random_Forest.ipynb             # Model Family 2: Random Forest
+│   ├── 05_Gradient_Boosting_XGBoost.ipynb # Model Family 3: Boosted Trees
+│   ├── 06_MLP_PyTorch.ipynb               # Model Family 4: Neural Networks
+│   ├── 07_Blend.ipynb                     # Basic OOF Stacking
+│   └── ...
+├── outputs/               # plots, models, submissions
 └── README.md
 ```
 

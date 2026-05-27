@@ -23,10 +23,11 @@ warnings.filterwarnings('ignore')
 RANDOM_STATE = 42
 N_SPLITS = 5
 N_ITER = 60
-OUT_DIR = Path('C:/pprojelerim/Airbnb-K353/outputs')
+OUT_DIR = Path('outputs')
 
 # ---- Load data ----------------------------------------------------------
-train_df = pd.read_parquet(OUT_DIR / 'train_features.parquet')
+# Section IV.C: Use Development portion of split
+train_df = pd.read_parquet(OUT_DIR / 'train_dev.parquet')
 test_df = pd.read_parquet(OUT_DIR / 'test_features.parquet')
 TARGET = 'NumReserveDays2016Q3'; ID = 'PropertyID'
 y = train_df[TARGET].astype(float).values

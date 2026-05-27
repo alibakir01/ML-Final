@@ -1,7 +1,4 @@
 {
-  "DecisionTree": 0.01593412174306181,
-  "RandomForest": 0.1056069900520563,
-  "GradientBoosting": 0.715870881826352,
-  "XGBoost": 0.0,
-  "MLP": 0.16258800637852983
+  "LinearRegression": 0.3041511996875716,
+  "RandomForest": 0.6958488003124284
 }
