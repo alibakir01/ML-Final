@@ -2,6 +2,7 @@
 
 Saves:
   outputs/oof_XGBoostV3.npy
+  outputs/test_local_pred_XGBoostV3.npy
   outputs/submission_xgboost_v3.csv (byte-safe)
   outputs/xgb_v3_best_params.json
   outputs/xgb_v3_search_log.csv
@@ -29,10 +30,12 @@ OUT_DIR = Path('outputs')
 # Section IV.C: Use Development portion of split
 train_df = pd.read_parquet(OUT_DIR / 'train_dev.parquet')
 test_df = pd.read_parquet(OUT_DIR / 'test_features.parquet')
+test_local_df = pd.read_parquet(OUT_DIR / 'test_local.parquet')
 TARGET = 'NumReserveDays2016Q3'; ID = 'PropertyID'
 y = train_df[TARGET].astype(float).values
 X = train_df.drop(columns=[TARGET, ID]).reset_index(drop=True)
 X_test = test_df.drop(columns=[ID]).reindex(columns=X.columns).reset_index(drop=True)
+X_test_local = test_local_df.drop(columns=[TARGET, ID]).reindex(columns=X.columns).reset_index(drop=True)
 test_ids = test_df[ID].values
 
 cat_all = X.select_dtypes(exclude='number').columns.tolist()
@@ -197,11 +200,21 @@ np.save(OUT_DIR / 'oof_XGBoostV3.npy', final['oof'])
 
 # Test predictions: average across 5 fold models
 test_preds = np.zeros(len(X_test))
+test_local_preds = np.zeros(len(X_test_local))
+
 for m, pp, best_iter in final['models']:
     Xt = pp.transform(X_test)
     p = np.clip(m.predict(Xt, iteration_range=(0, best_iter + 1)), 0, 92)
     test_preds += p
+    
+    Xtl = pp.transform(X_test_local)
+    pl = np.clip(m.predict(Xtl, iteration_range=(0, best_iter + 1)), 0, 92)
+    test_local_preds += pl
+
 test_preds /= len(final['models'])
+test_local_preds /= len(final['models'])
+
+np.save(OUT_DIR / 'test_local_pred_XGBoostV3.npy', test_local_preds)
 test_preds_int = np.clip(np.round(test_preds), 0, 92).astype(int)
 
 lines = [b'PropertyID_test,Pred\n']
