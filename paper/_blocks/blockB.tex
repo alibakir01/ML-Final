@@ -1,0 +1,11 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\begin{document}
+We can state this encoder precisely. Let the target have global mean $\mu=\frac{1}{n}\sum_{i=1}^{n}y_i$. A category level $c$ that occurs in $n_c$ training rows, with category mean $\bar y_c=\frac{1}{n_c}\sum_{i:\,x_i=c}y_i$, is mapped to the additively smoothed value
+\[ e_c=\frac{n_c\,\bar y_c+\alpha\,\mu}{n_c+\alpha},\qquad \alpha=20, \]
+where the smoothing factor $\alpha$ acts as a number of pseudo-counts of the prior: a rare level ($n_c\ll\alpha$) is shrunk toward the global mean $\mu$, while a common level ($n_c\gg\alpha$) approaches its raw mean $\bar y_c$. To keep the encoding leakage-free it is fitted in an internal $K$-fold loop ($K=5$): for inner folds $\mathcal{F}_1,\dots,\mathcal{F}_K$, the value assigned to a training row $i\in\mathcal{F}_k$ uses statistics estimated only on the complementary folds,
+\[ \tilde e_i=e_{\,x_i}^{(-\mathcal{F}_k)},\qquad i\in\mathcal{F}_k, \]
+so that no row ever contributes to its own encoded value. Validation and test rows use the full-training map, and category levels unseen at fit time fall back to $\mu$.
+\end{document}

@@ -1,0 +1,11 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\begin{document}
+The network is defined as follows. It maps the preprocessed input $\mathbf{z}^{(0)}=\mathbf{x}\in\mathbb{R}^{d}$ through three hidden blocks of width $(256,128,64)$. Each block $\ell$ applies an affine map, batch normalisation, a ReLU activation and dropout with rate $p=0.2$:
+\[ \mathbf{a}^{(\ell)}=\mathbf{W}^{(\ell)}\mathbf{z}^{(\ell-1)}+\mathbf{b}^{(\ell)},\qquad \mathbf{z}^{(\ell)}=\mathrm{Dropout}_{p}\!\big(\mathrm{ReLU}(\mathrm{BN}(\mathbf{a}^{(\ell)}))\big),\quad \ell=1,2,3, \]
+with $\mathrm{ReLU}(u)=\max(0,u)$ and $\mathrm{BN}(a)=\gamma\,\dfrac{a-\mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^{2}+\epsilon}}+\beta$ over the mini-batch $\mathcal{B}$. A linear read-out produces the prediction in log space, $\hat r=\mathbf{w}^{(4)\top}\mathbf{z}^{(3)}+b^{(4)}$. The network is trained on the log-transformed target $t=\log(1+y)$ with the mean-squared-error loss $\mathcal{L}=\frac{1}{|\mathcal{B}|}\sum_{i\in\mathcal{B}}(\hat r_i-t_i)^{2}$, and predictions are mapped back and clipped as $\hat y=\mathrm{clip}(e^{\hat r}-1,\,0,\,92)$. Parameters are updated by Adam with learning rate $\eta=10^{-3}$ and $L_2$ weight decay $10^{-5}$, using the bias-corrected moment estimates of the gradient:
+\[ \boldsymbol{\theta}_{t+1}=\boldsymbol{\theta}_{t}-\eta\,\frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t}+\epsilon},\qquad \hat{\mathbf{m}}_t=\frac{\mathbf{m}_t}{1-\beta_1^{t}},\quad \hat{\mathbf{v}}_t=\frac{\mathbf{v}_t}{1-\beta_2^{t}}. \]
+Training uses a batch size of $512$ for up to $60$ epochs with early stopping on the validation MSE (patience $8$).
+\end{document}

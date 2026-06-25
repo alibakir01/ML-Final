@@ -1,0 +1,7 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\begin{document}
+The drop from $182.2$ to $180.5$ MSE is small, so we tested whether it reflects a real improvement or merely cross-validation variance. Because XGBoost and the blend predict the same $19{,}497$ development rows, we use a \emph{paired} test on the per-row squared errors, the sample-level analogue of the paired resampling tests recommended for model comparison. Writing $d_i=(y_i-\hat y_i^{\mathrm{xgb}})^{2}-(y_i-\hat y_i^{\mathrm{bl}})^{2}$, the sample mean of the differences equals the MSE gap, $\bar d=1.69$. A two-sided paired $t$-test of $H_0:\mathbb{E}[d_i]=0$ gives $t=4.55$ with $p=5.3\times10^{-6}$, and the $95\%$ confidence interval on the squared-error reduction is $[0.96,\,2.42]$, which excludes zero. The non-parametric Wilcoxon signed-rank test agrees overwhelmingly ($p<10^{-50}$). We therefore reject $H_0$: the blend's improvement over XGBoost is statistically significant, not an artefact of CV variance. The effect size is small (Cohen's $d_z\approx0.03$), which is expected because the blend only alters the minority of rows where the component models disagree, but it is consistent and is obtained at essentially no extra training cost. For full rigour a $5\times2$ cross-validation paired $t$-test would re-draw the folds five times; the sample-level paired test above tests the same hypothesis on our existing held-out predictions and is what our compute budget allowed.
+\end{document}

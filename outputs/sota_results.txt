@@ -1,0 +1,5 @@
+SOTA BASELINES (5-fold CV on the 19,497-row development set, same split as XGBoost)
+==============================================================================
+Model              MSE     MAE      R2   MSE_std     sec
+LightGBM        184.14    8.24   0.762      7.42    18.3
+CatBoost        184.28    8.27   0.762      6.17    39.9
