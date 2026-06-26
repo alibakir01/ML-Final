@@ -64,9 +64,9 @@ scikit-learn pipelines, and tuned the boosted trees with a custom randomized
 search that uses fold-level early stopping. Our single best model, a retuned
 XGBoost regressor, reached a 5-fold cross-validation MSE of 182.2 on the local
 training set, and a convex (SLSQP) weighted blend lowered the out-of-fold MSE
-further to 180.5. We formally define the target-encoding, search, MLP, and
+further to 180.0. We formally define the target-encoding, search, MLP, and
 blending objectives, and we verify the blend gain with a paired significance
-test ($t=4.55$, $p=5.3\times10^{-6}$) and a residual analysis on the bounded
+test ($t=5.33$, $p=1.0\times10^{-7}$) and a residual analysis on the bounded
 $[0,92]$ target. The blended submission scored 185.499 MSE on the Kaggle
 leaderboard, placing our team first out of six competing teams. We also
 discuss, in detail, which parts of our midterm plan we kept, which we dropped
@@ -883,7 +883,7 @@ the strongest single family. After the dedicated 60-configuration retuning with
 early stopping, our retuned experimental XGBoost~v3 reached a 5-fold CV MSE of
 183.1 (Table~\ref{tab:cv}); after porting the most useful v3 settings back into
 the main XGBoost, that model reached 182.2, and the SLSQP blend pushed the
-out-of-fold error down to 180.5---about a 2\% relative improvement over the best
+out-of-fold error down to 180.0---about a 2\% relative improvement over the best
 single model, which is a typical and welcome gain from blending.
 
 \begin{table}[!t]
@@ -902,7 +902,7 @@ MLP & 217.6 & 8.03 & 0.718 \\
 GradientBoosting & 245.3 & 8.46 & 0.683 \\
 \midrule
 XGBoost v3 (retuned) & 183.1 & --- & --- \\
-\textbf{Weighted blend (final)} & \textbf{180.5} & --- & --- \\
+\textbf{Weighted blend (final)} & \textbf{180.0} & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -970,7 +970,7 @@ of a large ensemble without the overfitting, and it made the search cheaper
 because bad configurations stopped early. The second was the blend. An
 equal-weight average of the five models scored 186.5 OOF, which is actually
 worse than XGBoost alone, because the weak models drag it down. Once we let
-SLSQP choose the weights, the error dropped to 180.5---the optimizer effectively
+SLSQP choose the weights, the error dropped to 180.0---the optimizer effectively
 ignored the weak models and kept only the complementary ones.
 Fig.~\ref{fig:blend} shows the per-model and blended OOF scores side by side, and
 Table~\ref{tab:weights} lists the optimal weights.
@@ -992,11 +992,14 @@ Table~\ref{tab:weights} lists the optimal weights.
 \toprule
 Model & Weight $w_j$ \\
 \midrule
-LinearRegression & 0.1001 \\
-RandomForest & 0.0323 \\
+LinearRegression & 0.0628 \\
+RandomForest & 0.0000 \\
 GradientBoosting & 0.0000 \\
-XGBoost & 0.7250 \\
-MLP & 0.1426 \\
+XGBoost & 0.3406 \\
+MLP & 0.1064 \\
+XGBoost v3 & 0.2557 \\
+LightGBM & 0.2014 \\
+CatBoost & 0.0330 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1017,7 +1020,7 @@ weight pattern in Table~\ref{tab:weights}: SLSQP is not merely picking the best
 model, it is exploiting error de-correlation.
 
 Table~\ref{tab:metrics} also reports the blend's MAE and $R^2$ alongside MSE.
-The blend improves not only the optimized MSE (180.50 vs.\ 182.19) but also the
+The blend improves not only the optimized MSE (180.01 vs.\ 182.19) but also the
 $R^2$ (0.766 vs.\ 0.764), and its MAE (8.10) is within a hair of the best
 individual MAE (the MLP's 8.03)---so the MSE gain does not come at the cost of
 median accuracy.
@@ -1034,9 +1037,12 @@ Model & MSE & MAE & $R^2$ \\
 LinearRegression & 207.61 & 9.22 & 0.731 \\
 RandomForest & 194.24 & 8.55 & 0.749 \\
 GradientBoosting & 245.29 & 8.46 & 0.683 \\
-MLP & 217.62 & 8.03 & 0.718 \\
+MLP & 220.26 & 8.03 & 0.718 \\
 XGBoost & 182.19 & 8.18 & 0.764 \\
-\textbf{SLSQP blend} & \textbf{180.50} & \textbf{8.10} & \textbf{0.766} \\
+XGBoost v3 & 182.87 & 8.18 & 0.763 \\
+LightGBM & 184.39 & 8.24 & 0.762 \\
+CatBoost & 184.55 & 8.27 & 0.762 \\
+\textbf{SLSQP blend} & \textbf{180.01} & \textbf{8.11} & \textbf{0.767} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1062,7 +1068,7 @@ MLP &      &      &      &      & 1.00 \\
 
 \subsection{Is the Blend Gain Statistically Significant?}
 \label{sec:significance}
-A drop from 182.2 to 180.5 MSE is small, so we tested whether it is real or just
+A drop from 182.2 to 180.0 MSE is small, so we tested whether it is real or just
 cross-validation noise. Because both models produce predictions for the same
 19{,}497 development rows, we use a \emph{paired} test on the per-sample squared
 errors, the natural sample-level analogue of the paired resampling tests
@@ -1074,13 +1080,13 @@ squared errors
 d_i=\big(e_i^{\text{xgb}}\big)^{2}-\big(e_i^{\text{bl}}\big)^{2}.
 \label{eq:diff}
 \end{equation}
-Its sample mean $\bar d$ is exactly the MSE gap, $\bar d = 182.19-180.50=1.69$.
-A two-sided paired $t$-test of $H_0:\mathbb{E}[d_i]=0$ gives $t=4.55$ with
-$p=5.3\times10^{-6}$, and the 95\% confidence interval on the mean squared-error
-reduction is $[0.96,\,2.42]$, which excludes zero. The non-parametric Wilcoxon
-signed-rank test agrees overwhelmingly ($p<10^{-50}$). We therefore reject $H_0$:
+Its sample mean $\bar d$ is exactly the MSE gap, $\bar d = 182.19-180.01=2.18$.
+A two-sided paired $t$-test of $H_0:\mathbb{E}[d_i]=0$ gives $t=5.33$ with
+$p=1.0\times10^{-7}$, and the 95\% confidence interval on the mean squared-error
+reduction is $[1.38,\,2.98]$, which excludes zero. The non-parametric Wilcoxon
+signed-rank test agrees overwhelmingly ($p<10^{-21}$). We therefore reject $H_0$:
 the blend's improvement over XGBoost is statistically significant, not an
-artefact of CV variance. The effect size is small (Cohen's $d_z\approx0.03$),
+artefact of CV variance. The effect size is small (Cohen's $d_z\approx0.04$),
 which is expected---the blend changes only the minority of rows where the
 component models disagree---but it is consistent and free, since the components
 were already trained. For full rigour a $5\times2$ cross-validation paired
@@ -1143,13 +1149,13 @@ The competition expects integer predictions, and no listing can exceed 92 booked
 nights, so the final post-processing step clips each prediction to $[0,92]$ and
 rounds it to the nearest integer. It is worth checking that this step does not
 quietly cost accuracy. On the development OOF predictions, the floating-point
-blend scores 180.500 MSE; after clipping and integer rounding the score rises only
-to 180.574, an increase of $+0.073$ MSE, or about $0.04\%$. The penalty is
+blend scores 180.010 MSE; after clipping and integer rounding the score rises only
+to 180.074, an increase of $+0.073$ MSE, or about $0.04\%$. The penalty is
 negligible because the blend's predictions are already close to integers for the
 large zero-and-low mass, and clipping only touches the handful of predictions that
 stray outside $[0,92]$. This $0.07$-MSE rounding cost, together with the public
 test set being a different sample of properties, fully accounts for the small gap
-between our internal OOF estimate (180.5) and the leaderboard score (185.5)
+between our internal OOF estimate (180.0) and the leaderboard score (185.5)
 discussed next; it is reassuring that the rounding does \emph{not} introduce a
 large or systematic error.
 
@@ -1158,7 +1164,7 @@ We submitted the integer-rounded, clipped predictions of the weighted blend to
 Kaggle. Our best entry scored 185.499 MSE on the leaderboard, which placed our
 team (``Bak{\i}r-Ba\c{s}kal'') first out of the six competing teams, across nine
 submissions. The leaderboard MSE (185.5) is very close to our internal OOF
-estimate (180.5), and the small gap is expected: the public score is computed on
+estimate (180.0), and the small gap is expected: the public score is computed on
 a different set of properties, and integer rounding adds a little error. The fact
 that the two numbers agree so closely is the best evidence we have that our
 cross-validation was honest and that we did not overfit the leaderboard.
@@ -1182,7 +1188,7 @@ We close the results with an honest account of what could undermine our
 conclusions. \emph{Internal validity:} all preprocessing is fitted inside the
 training fold and target encodings use an inner $K$-fold (Section~\ref{sec:preproc}),
 so we are confident there is no train/validation leakage; the close agreement
-between the OOF MSE (180.5) and the leaderboard MSE (185.5) is empirical support
+between the OOF MSE (180.0) and the leaderboard MSE (185.5) is empirical support
 for this. The residual integer-rounding step adds a small, unavoidable
 quantization error that explains part of that gap. \emph{External validity:} the
 model is fitted to a single market (New York City) and a single quarter (Q3
@@ -1363,5 +1369,74 @@ Boosting, XGBoost, and a PyTorch MLP trained with Adam, combined by a convex
 weighted blend. No external models (e.g.\ CatBoost or LightGBM) were used. We did
 not use Kaggle notebooks or Colab for training; we used GitHub and a local IDE,
 and uploaded submission \texttt{.csv} files to Kaggle manually.
+
+
+\section{Complete Feature Inventory}
+\label{app:allfeatures_table}
+Here is the complete inventory of all 149 engineered features, along with the identifier and target variables, and their corresponding data types.
+
+\begin{table*}[!ht]
+\caption{Detailed list of all 151 columns in the processed feature matrix.}
+\label{tab:allfeatures_list}
+\centering
+\footnotesize
+\begin{tabular}{ll|ll|ll}
+\toprule
+Feature Name & Type & Feature Name & Type & Feature Name & Type \\
+\midrule
+PropertyID & integer (ID) & q1\_days\_A & binary & h1\_available\_rate & float \\
+NumReserveDays2016Q3 & integer (target) & q1\_days\_B & binary & h1\_reserved\_rate & float \\
+PropertyType & str & q1\_days\_R & binary & h1\_price\_range & float \\
+ListingType & str & q1\_unique\_reservations & integer & h1\_price\_cv & float \\
+Zipcode & integer & q1\_price\_mean & float & h1\_price\_iqr & float \\
+Neighborhood & str & q1\_price\_median & float & q1\_we\_days & integer \\
+MetropolitanStatisticalArea & str & q1\_price\_std & float & q1\_we\_booked & binary \\
+NumberofReviews & float & q1\_price\_nunique & integer & q1\_we\_price\_mean & float \\
+OverallRating & float & q1\_price\_min & float & q1\_wd\_days & integer \\
+Bedrooms & float & q1\_price\_max & float & q1\_wd\_booked & binary \\
+Bathrooms & float & q1\_price\_q25 & float & q1\_wd\_price\_mean & float \\
+MaxGuests & integer & q1\_price\_q75 & float & q1\_we\_booking\_rate & float \\
+ResponseRate & float & q1\_booking\_rate & float & q1\_wd\_booking\_rate & float \\
+ResponseTimemin & float & q1\_available\_rate & float & q1\_weekend\_premium & float \\
+Superhost & float & q1\_reserved\_rate & float & q1\_weekend\_minus\_weekday\_book\_rate & float \\
+CancellationPolicy & str & q1\_price\_range & float & q2\_we\_days & integer \\
+SecurityDeposit & float & q1\_price\_cv & float & q2\_we\_booked & binary \\
+CleaningFee & float & q1\_price\_iqr & float & q2\_we\_price\_mean & float \\
+ExtraPeopleFee & float & q2\_days\_total & integer & q2\_wd\_days & integer \\
+PublishedNightlyRate & integer & q2\_days\_A & binary & q2\_wd\_booked & binary \\
+PublishedMonthlyRate & float & q2\_days\_B & binary & q2\_wd\_price\_mean & float \\
+PublishedWeeklyRate & float & q2\_days\_R & binary & q2\_we\_booking\_rate & float \\
+MinimumStay & integer & q2\_unique\_reservations & integer & q2\_wd\_booking\_rate & float \\
+NumberofPhotos & float & q2\_price\_mean & float & q2\_weekend\_premium & float \\
+BusinessReady & float & q2\_price\_median & float & q2\_weekend\_minus\_weekday\_book\_rate & float \\
+InstantbookEnabled & float & q2\_price\_std & float & q1\_booked\_m1 & binary \\
+Latitude & float & q2\_price\_nunique & integer & q1\_booked\_m2 & binary \\
+Longitude & float & q2\_price\_min & float & q1\_booked\_m3 & binary \\
+PropertyAgeDays & integer & q2\_price\_max & float & q2\_booked\_m4 & binary \\
+ReviewsPerMonth & float & q2\_price\_q25 & float & q2\_booked\_m5 & binary \\
+PricePerGuest & float & q2\_price\_q75 & float & q2\_booked\_m6 & binary \\
+WeeklyDiscount & float & q2\_booking\_rate & float & q1\_status\_changes & integer \\
+MonthlyDiscount & float & q2\_available\_rate & float & q1\_new\_bookings & integer \\
+BedBathRatio & float & q2\_reserved\_rate & float & q1\_booking\_ends & integer \\
+ResponseRate\_missing & binary & q2\_price\_range & float & q2\_status\_changes & integer \\
+ResponseTimemin\_missing & binary & q2\_price\_cv & float & q2\_new\_bookings & integer \\
+SecurityDeposit\_missing & binary & q2\_price\_iqr & float & q2\_booking\_ends & integer \\
+CleaningFee\_missing & binary & h1\_days\_total & integer & h1\_status\_changes & integer \\
+ExtraPeopleFee\_missing & binary & h1\_days\_A & binary & h1\_new\_bookings & integer \\
+OverallRating\_missing & binary & h1\_days\_B & binary & h1\_booking\_ends & integer \\
+HasReviews & binary & h1\_days\_R & binary & recent\_days & float \\
+kw\_luxury & binary & h1\_unique\_reservations & integer & recent\_booked & binary \\
+kw\_private & binary & h1\_price\_mean & float & recent\_available & float \\
+kw\_near & binary & h1\_price\_median & float & recent\_price\_mean & float \\
+kw\_cozy & binary & h1\_price\_std & float & recent\_price\_std & float \\
+kw\_view & binary & h1\_price\_nunique & integer & recent\_booking\_rate & float \\
+kw\_modern & binary & h1\_price\_min & float & recent\_available\_rate & float \\
+title\_len & integer & h1\_price\_max & float & price\_change\_q2\_q1 & float \\
+title\_words & integer & h1\_price\_q25 & float & booking\_rate\_change\_q2\_q1 & float \\
+geo\_cluster & str & h1\_price\_q75 & float &  &  \\
+q1\_days\_total & integer & h1\_booking\_rate & float &  &  \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \end{document}

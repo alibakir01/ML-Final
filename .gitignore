@@ -1,4 +1,6 @@
 /data
+/paper
+/figures
 notebooks/ML-Final.code-workspace
 
 # CatBoost auto-generated training logs
