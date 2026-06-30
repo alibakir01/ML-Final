@@ -1,0 +1,9 @@
+SIGNIFICANCE [setupA] best single (XGBoost, MSE=326.35) vs SLSQP blend (MSE=322.16)
+==================================================================
+n                       : 36111
+mean SE diff (best-blend): 4.1926
+95% CI                  : [3.1233, 5.2618]
+paired t-test           : t=7.6854, p=1.564e-14
+Wilcoxon                : W=229951421.0, p=1.028e-30
+Cohen's d_z             : 0.0404
+verdict                 : SIGNIFICANT (p<0.05, CI excludes 0)

@@ -1,0 +1,9 @@
+TUNING [setupC] target=y_clean (30 configs/family, 5-fold CV)
+============================================================
+tuned XGBoost  MSE=259.08  R2=0.661
+tuned LightGBM MSE=260.45  R2=0.659
+tuned blend    MSE=257.36  R2=0.663
+blend weights: XGBoost_tuned=0.437, LightGBM_tuned=0.235, RandomForest=0.325, CatBoost=0.003, LinearRegression=0.000
+
+best XGBoost cfg: {'n_estimators': 931, 'learning_rate': 0.012304043582183299, 'max_depth': 8, 'min_child_weight': 8, 'subsample': 0.7616570305879855, 'colsample_bytree': 0.6564451226617606, 'reg_lambda': 2.0058018625001686, 'reg_alpha': 0.0028637579520267653}
+best LightGBM cfg: {'n_estimators': 643, 'learning_rate': 0.01424339095997766, 'num_leaves': 65, 'min_child_samples': 11, 'subsample': 0.607401805717754, 'colsample_bytree': 0.6193883932074911, 'reg_lambda': 0.8114453750828322}

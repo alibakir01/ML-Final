@@ -1,0 +1,11 @@
+RESULTS [setupB2Q_price] target=y_booked_q1_2026 (5-fold CV, n=36282)
+============================================================
+Model                   MSE     MAE      R2
+LinearRegression     341.52   11.82   0.428
+RandomForest         286.83    9.93   0.520
+XGBoost              279.73    9.81   0.532
+LightGBM             278.60    9.72   0.534
+CatBoost             285.29   10.11   0.522
+SLSQP blend          276.32    9.75   0.537
+
+Blend weights: LinearRegression=0.000, RandomForest=0.230, XGBoost=0.236, LightGBM=0.486, CatBoost=0.048

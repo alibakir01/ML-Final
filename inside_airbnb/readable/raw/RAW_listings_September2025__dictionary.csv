@@ -1,0 +1,80 @@
+﻿column,dtype,non_null_%,example_or_stats
+id,int64,100.0,min=2539.00 | mean=459318475310361664.00 | max=1500162562723746560.00
+listing_url,str,100.0,https://www.airbnb.com/rooms/2539 | https://www.airbnb.com/rooms/2595 | https://www.airbnb.com/rooms/6848
+scrape_id,int64,100.0,min=20250901181232.00 | mean=20250901181232.00 | max=20250901181232.00
+last_scraped,str,100.0,2025-09-02 | 2025-09-03
+source,str,100.0,city scrape | previous scrape
+name,str,100.0,"Water View King Bed Hotel Room | Private bedroom -3 mins to shopping center | Cozy room@Queens! Same area W/Target,Costco"
+description,str,97.4,You'll have a great time at this comfortable place to stay. | Keep it simple at this peaceful and centrally-located place. | Unique opportunity to live in the heart of New York City! Location is everything and this historic property is 1 block away from the most iconic location in all of New York : Times Square!
+neighborhood_overview,str,52.1,"This furnished apartment is located in Midtown East. This bustling neighborhood is home to NYC landmarks like the Empire State Building, the United Nations' headquarters, and Grand Central Station. Midtown East is also home to a thriving dining scene, with everything from humble food carts selling hotdogs to white-tablecloth restaurants with multiple Michelin stars. There are also many cultural attractions, including the Museum of Modern Art, the lovely Japan Society, the historic Morgan Library, and more. Midtown East is also home to some incredible shopping, from the international flagship stores along Fifth Avenue to Bloomingdale's, one of the city's best-loved department stores. | This furnished apartment is located in the Financial District, also known as FiDi. Home to Wall Street, One World Trade Center, the South Street Seaport, and Bowling Green it is a constant hub of activity. During the week the sidewalk is always bustling and the restaurants are filled with professionals. The glittering skyscrapers and well-known landmarks make this one of the city’s most recognizable and historic neighborhoods. By subway, Times Square is about 20 minutes away. | This furnished rental is located in the West Village. Cute storefronts and some cobblestone streets give the charming neighborhood the feel of a quaint small town. Populated with shoppers, diners and art lovers. The historically artistic area has numerous piano bars, cabarets, and theaters to discover. Both Times Square and Wall Street are just 15 minutes away by subway."
+picture_url,str,100.0,https://a0.muscache.com/pictures/6998e77e-4564-49e8-b652-61c90e84ee65.jpg | https://a0.muscache.com/pictures/miso/Hosting-1006416060412152707/original/2326cb35-5479-4683-b294-5c7b3c0dbaff.jpeg | https://a0.muscache.com/pictures/dc129afb-e2fc-42ea-8392-217917f247a0.jpg
+host_id,int64,100.0,min=1678.00 | mean=174598425.94 | max=716108254.00
+host_url,str,100.0,https://www.airbnb.com/users/show/107434423 | https://www.airbnb.com/users/show/3223938 | https://www.airbnb.com/users/show/446820235
+host_name,str,96.9,Eugene | Michael | Kristina
+host_since,str,96.9,2012-08-11 | 2022-02-25 | 2015-12-16
+host_location,str,76.0,"New York, NY | New York, United States | United States"
+host_about,str,54.5,"my number: (Phone number hidden by Airbnb) , my email: (Email hidden by Airbnb) | Great working experience in hospitality, Actually Hospitality and Guest Services is in our DNA and love to help people amd guide them about local culture activities and entertainments. | Are you tired of the tedious and time-consuming process of finding the right place to live? At Outpost Club, we think it should be as easy as grabbing your favorite cup of coffee. Our team - comprised of seasoned travelers - founded Outpost Club to make the process of relocating to a new city easier than ever before."
+host_response_time,str,56.8,within an hour | within a few hours | within a day
+host_response_rate,str,56.8,100% | 0% | 99%
+host_acceptance_rate,str,57.0,100% | 0% | 99%
+host_is_superhost,str,98.8,f | t
+host_thumbnail_url,str,96.9,https://a0.muscache.com/defaults/user_pic-50x50.png?v=3 | https://a0.muscache.com/im/pictures/user/User/original/f1289136-7830-481f-b8c2-57f0c9eb6483.jpeg?aki_policy=profile_small | https://a0.muscache.com/im/pictures/user/User/original/ccc92c5b-f362-4d2a-b52a-f04ffc0f16a9.jpeg?aki_policy=profile_small
+host_picture_url,str,96.9,https://a0.muscache.com/defaults/user_pic-225x225.png?v=3 | https://a0.muscache.com/im/pictures/user/User/original/f1289136-7830-481f-b8c2-57f0c9eb6483.jpeg?aki_policy=profile_x_medium | https://a0.muscache.com/im/pictures/user/User/original/ccc92c5b-f362-4d2a-b52a-f04ffc0f16a9.jpeg?aki_policy=profile_x_medium
+host_neighbourhood,str,76.7,Bedford-Stuyvesant | Williamsburg | Bushwick
+host_listings_count,float64,96.9,min=1.00 | mean=109.87 | max=5445.00
+host_total_listings_count,float64,96.9,min=1.00 | mean=190.24 | max=9551.00
+host_verifications,str,96.9,"['email', 'phone'] | ['email', 'phone', 'work_email'] | ['phone']"
+host_has_profile_pic,str,96.9,t | f
+host_identity_verified,str,96.9,t | f
+neighbourhood,str,52.1,Neighborhood highlights
+neighbourhood_cleansed,str,100.0,Bedford-Stuyvesant | Williamsburg | Midtown
+neighbourhood_group_cleansed,str,100.0,Manhattan | Brooklyn | Queens
+latitude,float64,100.0,min=40.50 | mean=40.73 | max=40.91
+longitude,float64,100.0,min=-74.25 | mean=-73.95 | max=-73.71
+property_type,str,100.0,Entire rental unit | Private room in rental unit | Private room in home
+room_type,str,100.0,Entire home/apt | Private room | Hotel room
+accommodates,int64,100.0,min=1.00 | mean=2.74 | max=16.00
+bathrooms,float64,59.0,min=0.00 | mean=1.19 | max=15.50
+bathrooms_text,str,99.6,1 bath | 1 shared bath | 1 private bath
+bedrooms,float64,83.1,min=0.00 | mean=1.39 | max=16.00
+beds,float64,58.9,min=0.00 | mean=1.63 | max=40.00
+amenities,str,100.0,"[""TV"", ""Washer"", ""Carbon monoxide alarm"", ""Air conditioning"", ""Wifi"", ""Kitchen"", ""Smoke alarm""] | [""Dedicated workspace"", ""Carbon monoxide alarm"", ""Wifi"", ""Kitchen"", ""Hot water"", ""Hangers"", ""Heating"", ""Smoke alarm""] | [""Wifi"", ""Coffee maker"", ""Hangers"", ""Shampoo"", ""Refrigerator"", ""Heating"", ""Self check-in"", ""Smoke alarm"", ""Bed linens"", ""Elevator"", ""Kitchen"", ""Hot water"", ""Lockbox"", ""Microwave"", ""Bathtub"", ""Crib"", ""Iron"", ""Air conditioning"", ""Dryer \u2013 In building"", ""Long term stays allowed"", ""High chair"", ""Pets allowed"", ""Gym"", ""Oven"", ""TV"", ""Carbon monoxide alarm"", ""Hair dryer"", ""Dishwasher"", ""Essentials"", ""Washer \u2013\u00a0In building"", ""Cooking basics"", ""Private entrance""]"
+price,str,58.4,$150.00 | $200.00 | $100.00
+minimum_nights,int64,100.0,min=1.00 | mean=28.61 | max=1124.00
+maximum_nights,int64,100.0,min=1.00 | mean=60479.37 | max=2147483647.00
+minimum_minimum_nights,int64,100.0,min=1.00 | mean=28.39 | max=1124.00
+maximum_minimum_nights,int64,100.0,min=1.00 | mean=38.35 | max=1124.00
+minimum_maximum_nights,int64,100.0,min=1.00 | mean=297995.38 | max=2147483647.00
+maximum_maximum_nights,int64,100.0,min=1.00 | mean=832253.73 | max=2147483647.00
+minimum_nights_avg_ntm,float64,100.0,min=1.00 | mean=29.25 | max=1124.00
+maximum_nights_avg_ntm,float64,100.0,min=1.00 | mean=741492.74 | max=2147483647.00
+calendar_updated,float64,0.0,min=nan | mean=nan | max=nan
+has_availability,str,84.4,t
+availability_30,int64,100.0,min=0.00 | mean=8.84 | max=30.00
+availability_60,int64,100.0,min=0.00 | mean=20.88 | max=60.00
+availability_90,int64,100.0,min=0.00 | mean=35.04 | max=90.00
+availability_365,int64,100.0,min=0.00 | mean=160.73 | max=365.00
+calendar_last_scraped,str,100.0,2025-09-02 | 2025-09-03
+number_of_reviews,int64,100.0,min=0.00 | mean=27.09 | max=3655.00
+number_of_reviews_ltm,int64,100.0,min=0.00 | mean=4.01 | max=1733.00
+number_of_reviews_l30d,int64,100.0,min=0.00 | mean=0.29 | max=124.00
+availability_eoy,int64,100.0,min=0.00 | mean=49.44 | max=121.00
+number_of_reviews_ly,int64,100.0,min=0.00 | mean=3.58 | max=1797.00
+estimated_occupancy_l365d,int64,100.0,min=0.00 | mean=47.00 | max=255.00
+estimated_revenue_l365d,float64,58.4,min=0.00 | mean=15904.63 | max=12750000.00
+first_review,str,69.1,2023-01-01 | 2019-01-01 | 2016-01-02
+last_review,str,69.1,2025-08-17 | 2025-08-24 | 2025-08-10
+review_scores_rating,float64,69.1,min=0.00 | mean=4.73 | max=5.00
+review_scores_accuracy,float64,69.1,min=0.00 | mean=4.76 | max=5.00
+review_scores_cleanliness,float64,69.1,min=0.00 | mean=4.66 | max=5.00
+review_scores_checkin,float64,69.1,min=0.00 | mean=4.84 | max=5.00
+review_scores_communication,float64,69.1,min=0.00 | mean=4.82 | max=5.00
+review_scores_location,float64,69.1,min=0.00 | mean=4.75 | max=5.00
+review_scores_value,float64,69.1,min=0.00 | mean=4.64 | max=5.00
+license,str,14.9,Exempt | OSE-STRREG-0000437 | OSE-STRREG-0001957
+instant_bookable,str,100.0,f | t
+calculated_host_listings_count,int64,100.0,min=1.00 | mean=64.05 | max=1108.00
+calculated_host_listings_count_entire_homes,int64,100.0,min=0.00 | mean=45.54 | max=1108.00
+calculated_host_listings_count_private_rooms,int64,100.0,min=0.00 | mean=17.62 | max=567.00
+calculated_host_listings_count_shared_rooms,int64,100.0,min=0.00 | mean=0.05 | max=22.00
+reviews_per_month,float64,69.1,min=0.01 | mean=0.82 | max=124.18

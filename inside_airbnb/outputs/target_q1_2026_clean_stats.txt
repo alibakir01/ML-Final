@@ -1,0 +1,4 @@
+CLEANER Q1 2026 TARGET
+==================================================
+y_clean    mean=16.30 median=1.0 std=25.03 %zero=48.7 corr_w_orig=0.949
+y_orig     mean=14.42 median=0.0 std=24.44 %zero=55.2 corr_w_orig=1.000

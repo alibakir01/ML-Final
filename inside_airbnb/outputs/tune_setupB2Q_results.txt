@@ -1,0 +1,9 @@
+TUNING [setupB2Q] target=y_booked_q1_2026 (30 configs/family, 5-fold CV)
+============================================================
+tuned XGBoost  MSE=274.87  R2=0.540
+tuned LightGBM MSE=277.00  R2=0.536
+tuned blend    MSE=272.72  R2=0.543
+blend weights: XGBoost_tuned=0.525, LightGBM_tuned=0.269, RandomForest=0.027, CatBoost=0.179, LinearRegression=0.000
+
+best XGBoost cfg: {'n_estimators': 1066, 'learning_rate': 0.02440497566986987, 'max_depth': 9, 'min_child_weight': 4, 'subsample': 0.8388734263912414, 'colsample_bytree': 0.6489133692632584, 'reg_lambda': 0.8703290217621882, 'reg_alpha': 0.0010521721669668515}
+best LightGBM cfg: {'n_estimators': 1139, 'learning_rate': 0.02611496021800793, 'num_leaves': 80, 'min_child_samples': 17, 'subsample': 0.7286291335402948, 'colsample_bytree': 0.7282373574391866, 'reg_lambda': 1.2396924540333643}

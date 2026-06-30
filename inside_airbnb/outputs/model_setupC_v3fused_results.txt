@@ -1,0 +1,11 @@
+RESULTS [setupC_v3fused] target=y_fused (5-fold CV, n=36282)
+============================================================
+Model                   MSE     MAE      R2
+LinearRegression     323.08   11.79   0.597
+RandomForest         272.23    9.96   0.660
+XGBoost              267.52    9.93   0.666
+LightGBM             266.53    9.85   0.667
+CatBoost             272.07   10.16   0.660
+SLSQP blend          263.73    9.85   0.671
+
+Blend weights: LinearRegression=0.000, RandomForest=0.301, XGBoost=0.142, LightGBM=0.451, CatBoost=0.107

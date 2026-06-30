@@ -1,0 +1,3 @@
+﻿column,dtype,non_null_%,example_or_stats
+listing_id,int64,100.0,min=2539.00 | mean=5654.64 | max=6848.00
+date,str,100.0,2018-07-17 | 2017-09-16 | 2018-04-29
