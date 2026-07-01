@@ -2,6 +2,7 @@
 /paper
 /figures
 notebooks/ML-Final.code-workspace
-
+/Internship/Airbnb_Inside
+/.claude
 # CatBoost auto-generated training logs
 catboost_info/

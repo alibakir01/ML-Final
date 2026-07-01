@@ -1,0 +1,7 @@
+{
+  "LinearRegression": 0.0,
+  "RandomForest": 0.23748983797063075,
+  "GradientBoosting": 0.0,
+  "XGBoost": 0.7232487768045789,
+  "MLP": 0.03926138522479041
+}

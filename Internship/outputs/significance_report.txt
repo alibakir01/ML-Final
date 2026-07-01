@@ -1,0 +1,11 @@
+SIGNIFICANCE OF THE XGBoost -> SLSQP-BLEND MSE IMPROVEMENT
+============================================================
+n (paired dev OOF samples)      : 29008
+MSE XGBoost                     : 321.3349
+MSE SLSQP blend                 : 319.9119
+Mean SE difference (XGB - blend): 1.4230
+95% CI on mean SE difference    : [0.6557, 2.1903]
+Paired t-test                   : t=3.6349, p=2.786e-04
+Wilcoxon signed-rank            : W=173426568.0, p=2.373e-11
+Effect size (Cohen's d_z)       : 0.0213
+Verdict                         : SIGNIFICANT (p<0.05): the blend genuinely lowers squared error; CI excludes 0.
