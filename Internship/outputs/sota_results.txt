@@ -1,5 +1,5 @@
-SOTA BASELINES (5-fold CV, same split as XGBoost)
+SOTA BASELINES (5-fold CV, same split as XGBoost, TUNED)
 ======================================================================
 Model              MSE     MAE      R2   MSE_std     sec
-LightGBM        325.93   10.15   0.807     10.38   104.4
-CatBoost        335.66   10.67   0.802      7.46    42.7
+LightGBM        307.96   10.43   0.511      3.47    39.3
+CatBoost        308.61   10.59   0.510      2.09    76.4
