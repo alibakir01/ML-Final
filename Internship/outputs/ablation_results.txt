@@ -1,8 +1,8 @@
 INCREMENTAL ABLATION (5-fold CV MSE, random_state=42)
 ============================================================
-Linear Reg., raw static features only                     392.8
-  + 175 engineered features (no target encoding)          375.3  (delta -17.5)
-  + K-fold target encoding (full preprocessing)           375.3  (delta +0.0)
-XGBoost (tuned, full preprocessing)                       300.3  (delta -75.0)
-Equal-weight blend of 8 learners                          309.7  (delta +9.3)
-SLSQP convex blend (proposed)                             298.4  (delta -11.3)
+Linear Reg., raw static features only                     385.1
+  + 196 engineered features (no target encoding)          370.5  (delta -14.5)
+  + K-fold target encoding (full preprocessing)           370.3  (delta -0.2)
+XGBoost (tuned, full preprocessing)                       300.2  (delta -70.1)
+Equal-weight blend of 8 learners                          308.7  (delta +8.5)
+SLSQP convex blend (proposed)                             298.0  (delta -10.8)

@@ -1,7 +1,7 @@
 HURDLE MODEL RESULTS (target=blocked_days_Q1_2026, 5-fold CV, n=29008, zero-rate=0.493)
 ====================================================================================================
 Variant                  DevMSE  DevMAE   DevR2   TestMSE  TestMAE  TestR2
-hurdle_xgb_EV            308.72   10.46   0.510    307.17    10.32   0.505
-hurdle_lgb_EV            307.80   10.42   0.511    305.77    10.27   0.507
-single_blend (v2)        298.39   10.21   0.526    296.62    10.03   0.522
-HURDLE+single blend      298.07   10.22   0.527    296.84    10.05   0.522
+hurdle_xgb_EV            304.98   10.38   0.516    303.42    10.22   0.511
+hurdle_lgb_EV            305.50   10.37   0.515    302.34    10.19   0.513
+single_blend (v2)        297.97   10.21   0.527    294.61    10.01   0.525
+HURDLE+single blend      297.51   10.22   0.528    295.14    10.04   0.524

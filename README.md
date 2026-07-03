@@ -35,3 +35,6 @@ DecisionTree, Bagging, RandomForest, GradientBoosting, XGBoost, MLP (PyTorch + A
 
 ## Acknowledgment
 This work was conducted as part of COMP 468 at **Abdullah Gül University (AGU)**.
+
+## Notes
+- [Claude Code memory](file:///Users/bashkal/.claude/projects/-Users-bashkal-Desktop-ML-ML-Final/memory/MEMORY.md) — ongoing project context/decisions log (local to this machine, not tracked in git).
