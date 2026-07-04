@@ -1,0 +1,9 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\begin{document}
+Because the target is bounded and zero-inflated, the aggregate MSE can hide systematic behaviour at the edges, so we examined the residuals $r_i=y_i-\hat y_i$ of the blend directly. Fig.~6 shows the standard diagnostics. The residual-versus-fitted panel reveals clear heteroscedasticity: errors are tight for small predictions and fan out as the predicted count grows. The residual-versus-true panel is the most telling for a censored target: residuals turn strongly positive in the upper band $[90,92]$, meaning the model under-predicts the busiest listings. The histogram is sharply peaked at zero but right-skewed, and the normal Q--Q plot departs from the line at both tails, confirming non-Gaussian residuals.
+\par\medskip
+To localise the bias we binned the rows by their true value and plotted the mean signed residual per bin (Fig.~7). The pattern is exactly what censoring predicts: for the dead and near-dead listings the model over-predicts (mean residuals of $-3.5$ at $y=0$ and $-8.3$ on $[1,5]$, i.e.\ $\hat y>y$), while for the busy listings it under-predicts increasingly toward the bound ($+12.0$ on $[51,80]$, $+15.2$ on $[81,89]$ and $+23.7$ on $[90,92]$). Clipping to $[0,92]$ removes impossible predictions but does nothing about this regression-to-the-mean at the boundaries. This is the single clearest motivation for the two-stage hurdle model proposed in Section~VII: a dedicated classifier for ``will this property be booked at all?'' would directly target the over-prediction on the large zero mass, and a separate regressor on the positive counts could be trained to be less biased near the upper bound.
+\end{document}

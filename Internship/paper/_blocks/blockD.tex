@@ -1,0 +1,9 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\begin{document}
+We can write this blend as a constrained optimisation problem. Stack the $m$ models' out-of-fold predictions into a matrix $\mathbf{P}\in\mathbb{R}^{n\times m}$, where column $j$ holds model $j$'s OOF prediction, and seek weights $\mathbf{w}$ that minimise the blended MSE subject to a convexity constraint:
+\[ \min_{\mathbf{w}\in\mathbb{R}^{m}}\ \frac{1}{n}\sum_{i=1}^{n}\Big(y_i-\mathrm{clip}\big[(\mathbf{P}\mathbf{w})_i,\,0,\,92\big]\Big)^{2}\qquad\text{s.t.}\quad \sum_{j=1}^{m}w_j=1,\ \ 0\le w_j\le 1. \]
+The equality constraint and the box bounds restrict $\mathbf{w}$ to the probability simplex, so the blend stays on the same scale as its inputs and no single model can receive a runaway weight. We solve this with Sequential Least-Squares Quadratic Programming (SLSQP, \texttt{scipy.optimize.minimize}) from the uniform starting point $w_j^{(0)}=1/m$ with tolerance $10^{-9}$; afterwards weights below $10^{-4}$ are set to zero and the remainder renormalised so that $\sum_j w_j=1$ still holds exactly.
+\end{document}

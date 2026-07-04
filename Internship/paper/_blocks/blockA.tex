@@ -1,0 +1,9 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\pagestyle{empty}
+\begin{document}
+A further question is \emph{why}, in mathematical terms, the linear baselines used in earlier Airbnb studies cannot capture demand of this shape. Ordinary least squares fits $\hat y(\mathbf{x})=\boldsymbol{\beta}^{\top}\mathbf{x}$ by minimising $\mathbb{E}[(y-\boldsymbol{\beta}^{\top}\mathbf{x})^{2}]$, whose solution is the best \emph{affine} approximation of the conditional mean $\mathbb{E}[y\mid\mathbf{x}]$. Our target, however, is a count censored to $[0,92]$ with a large probability mass at zero (about $53.5\%$ of the development rows are exactly zero). If the observed count is generated as
+\[ y=\max\!\big(0,\ \min(92,\ \boldsymbol{\beta}^{\top}\mathbf{x}+\varepsilon)\big), \]
+then the censoring makes $\mathbb{E}[y\mid\mathbf{x}]$ a \emph{non-linear}, saturating function of $\mathbf{x}$ even when the latent score is linear: it must flatten to $0$ for low-demand listings and saturate toward $92$ for the busiest ones. An affine predictor cannot reproduce those two plateaus, so it extrapolates past both edges, returning negative fitted values for the dead listings and undershooting the saturated ones. This is precisely the limited-dependent-variable regime that motivates Tobit and two-part (hurdle) estimators, and it is the structural reason the linear price models of earlier work do not transfer to the zero-inflated demand counts studied here. Tree ensembles avoid the problem because a regression tree approximates the saturating conditional mean with axis-aligned piecewise-constant regions, so the $0$ and $92$ plateaus are simply leaves and boosting refines the transition between them.
+\end{document}
