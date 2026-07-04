@@ -1,0 +1,31 @@
+﻿id,name,host_id,host_profile_id,host_name,neighbourhood_group,neighbourhood,latitude,longitude,room_type,price,minimum_nights,number_of_reviews,last_review,reviews_per_month,calculated_host_listings_count,availability_365,number_of_reviews_ltm,license
+2595,Skylit Studio Oasis | Midtown Manhattan Sanctuary,2845,1.4625063262623954e+18,Jennifer,Manhattan,Midtown,40.75356,-73.98559,Entire home/apt,,30.0,47,2022-06-21,0.24,3,256,0,
+6848,Only 2 stops to Manhattan studio,15991,1.462506783043501e+18,Allen,Brooklyn,Williamsburg,40.70935,-73.95342,Entire home/apt,,30.0,197,2025-11-17,0.97,1,198,4,
+6872,Uptown Sanctuary w/ Private Bath (Month to Month),16104,1.4625067848742226e+18,Kae,Manhattan,East Harlem,40.80107,-73.94255,Private room,,30.0,2,2025-10-07,0.04,2,83,1,
+6990,UES Beautiful Blue Room,16800,1.4625068390763054e+18,Cynthia,Manhattan,East Harlem,40.78778,-73.94759,Private room,,30.0,251,2026-01-11,1.26,1,214,4,
+7097,"Perfect for Your Parents, With Garden & Patio",17571,1.462506848265336e+18,Jane,Brooklyn,Fort Greene,40.69194,-73.97389,Private room,,2.0,423,2025-09-23,2.16,2,0,26,OSE-STRREG-0000008
+7801,Sunny Williamsburg Loft with Private Cedar Sauna,21207,1.4625069513107448e+18,Chaya,Brooklyn,Williamsburg,40.71880722045898,-73.9561767578125,Entire home/apt,,30.0,12,2024-07-31,0.06,1,196,0,
+8490,"Maison des Sirenes1,bohemian, luminous apartment",25183,1.4625070102070057e+18,Nathalie,Brooklyn,Bedford-Stuyvesant,40.68455584344908,-73.93963415175676,Entire home/apt,,30.0,189,2023-10-16,0.94,2,220,0,
+9357,Midtown Pied-a-terre,30193,1.4625071257510277e+18,Tommi,Manhattan,Hell's Kitchen,40.76724,-73.98664,Entire home/apt,,30.0,58,2017-08-13,0.29,1,150,0,
+10452,Radiant Oasis  B&B Style room,35935,1.4625072838869527e+18,Angela,Brooklyn,Bedford-Stuyvesant,40.68294,-73.95682,Private room,,30.0,82,2025-03-31,0.43,6,229,1,
+11943,Country space in the city,45445,1.4625075173886922e+18,Harriet,Brooklyn,Flatbush,40.63702,-73.96327,Private room,,30.0,0,,,1,0,0,
+12192,ENJOY Downtown NYC!,46978,1.4625075744320448e+18,Edward,Manhattan,East Village,40.72296,-73.98383,Private room,,30.0,316,2026-01-06,1.59,2,13,2,
+12937,"1 Stop to Midtown! Private Bedroom, Landmark House",50124,1.4625076386396603e+18,Orestes,Queens,Long Island City,40.74757,-73.94571,Private room,,1.0,470,2026-01-14,2.46,1,140,37,OSE-STRREG-0000923
+12940,Charming Brownstone 3 - Near PRATT,50148,1.4625076394732283e+18,Adreinne,Brooklyn,Bedford-Stuyvesant,40.67946,-73.95417,Entire home/apt,,30.0,81,2025-11-15,0.41,1,241,2,
+14314,Greenpoint Place...Has It All!,56246,1.4625078326457306e+18,Jeanne,Brooklyn,Greenpoint,40.73535,-73.95584,Entire home/apt,,30.0,177,2025-11-17,0.9,1,228,1,
+15385,"Very, very cozy place",60252,1.4625079693188923e+18,Cristina,Brooklyn,Williamsburg,40.71211,-73.96397,Private room,,31.0,63,2025-07-25,0.33,1,97,3,
+15396,Sunny & Spacious Chelsea Apartment,60278,1.4625079704088525e+18,Petra,Manhattan,Chelsea,40.74493,-73.99521,Entire home/apt,,180.0,5,2018-11-03,0.04,1,179,0,
+16338,"Large Room + Private Deck, Clinton Hill Best Area",63613,1.4625080866123569e+18,Patricia,Brooklyn,Clinton Hill,40.69121,-73.96804,Private room,,30.0,33,2025-12-03,0.17,1,303,1,
+16580,"Sunny, Modern room in East Village w City Views",64442,1.462508106838747e+18,Reka,Manhattan,East Village,40.72372723229208,-73.97625850509617,Private room,,1.0,676,2026-01-25,4.45,2,228,57,OSE-STRREG-0000108
+16821,Charming Room in Amazing East Village Apt. (B),4396,1.4625064115478776e+18,Casey,Manhattan,East Village,40.72281,-73.98501,Private room,,1.0,301,2026-02-10,1.83,2,42,57,OSE-STRREG-0001710
+16974,SpaHa Loft: Enormous and Bright,65837,1.462508191008623e+18,Robin,Manhattan,East Harlem,40.8019,-73.93762,Entire home/apt,,30.0,291,2023-09-05,1.48,1,239,0,
+17037,Lovely EV Artist's Home,66035,1.462508196146433e+18,Anna,Manhattan,East Village,40.72289,-73.98028,Entire home/apt,,30.0,53,2024-06-06,0.27,1,177,0,
+18152,Manhattan Room,69942,1.4625083230301422e+18,Victoria,Manhattan,Upper East Side,40.76967,-73.94831,Private room,,30.0,146,2019-09-01,0.83,1,365,0,
+18728,Beautiful Meatpacking District Loft,71876,1.4625083643975496e+18,DAVID And RICK,Manhattan,Chelsea,40.74261,-74.00353,Private room,,30.0,251,2025-08-24,1.38,1,357,1,
+18961,Cozy Studio in Great Location!,70857,1.462508342742173e+18,Fabian,Manhattan,Kips Bay,40.73808,-73.98001,Private room,,30.0,1,2016-03-22,0.01,1,0,0,
+19174,One bedroom Duplex Private Terrace West Village,73164,1.4625084472821076e+18,Alexis,Manhattan,West Village,40.73917,-74.00207,Entire home/apt,,90.0,68,2024-12-27,0.35,1,0,0,
+19812,2 bedroom Williamsburg Apt - Bedford L stop,74857,1.4625084943395185e+18,Starlee,Brooklyn,Williamsburg,40.71802,-73.95724,Entire home/apt,,30.0,58,2018-07-29,0.3,1,253,0,
+20913,Charming 1 bed GR8 WBurg LOCATION!,79402,1.462508649888223e+18,Christiana,Brooklyn,Williamsburg,40.70967,-73.95922,Entire home/apt,,30.0,164,2018-07-22,0.88,1,0,0,
+21456,Light-filled classic Central Park,42032,1.4625074580007834e+18,Dana,Manhattan,Upper West Side,40.79936,-73.96155,Private room,,30.0,79,2021-09-12,0.41,1,365,0,
+21644,"Upper Manhattan, New York",82685,1.4625087171910956e+18,Elliott,Manhattan,Harlem,40.82782,-73.9473,Private room,,30.0,3,2019-10-21,0.03,1,0,0,
+21794,COZY QUIET monthly room 4 DOOGLERS!,83257,1.4625091974251973e+18,Olan,Manhattan,Chelsea,40.74187,-74.00223,Private room,,30.0,36,2020-01-19,0.19,2,365,0,

@@ -1,0 +1,11 @@
+HELD-OUT EVALUATION -- Setup C (7-mo history -> Feb-Mar-Apr 2026, clean target)
+dev n=29025, held-out test n=7257, seed=42
+====================================================================
+Model                DevMSE   DevR2   TestMSE   TestR2
+LinearRegression     321.79   0.581    326.04    0.568
+RandomForest         266.68   0.652    268.66    0.644
+XGBoost              261.36   0.659    266.21    0.647
+LightGBM             261.85   0.659    264.64    0.649
+CatBoost             265.31   0.654    270.82    0.641
+SLSQP blend          258.35   0.663    262.04    0.653
+blend weights: LinearRegression=0.000, RandomForest=0.283, XGBoost=0.243, LightGBM=0.336, CatBoost=0.138

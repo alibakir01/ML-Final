@@ -1,0 +1,20 @@
+﻿column,dtype,non_null_%,example_or_stats
+id,int64,100.0,min=2595.00 | mean=504161483468969856.00 | max=1619352090929639936.00
+name,str,100.0,"Water View King Bed Hotel Room | Private bedroom -3 mins to shopping center | Cozy room@Queens! Same area W/Target,Costco"
+host_id,int64,100.0,min=1678.00 | mean=181982463.27 | max=744548738.00
+host_profile_id,float64,98.5,min=1462506270716056832.00 | mean=1466891733658094336.00 | max=1619085778832602368.00
+host_name,str,98.6,Blueground | Eugene | Michael
+neighbourhood_group,str,100.0,Manhattan | Brooklyn | Queens
+neighbourhood,str,100.0,Bedford-Stuyvesant | Midtown | Williamsburg
+latitude,float64,100.0,min=40.50 | mean=40.73 | max=40.91
+longitude,float64,100.0,min=-74.25 | mean=-73.95 | max=-73.71
+room_type,str,100.0,Entire home/apt | Private room | Hotel room
+price,float64,0.0,min=nan | mean=nan | max=nan
+minimum_nights,float64,99.9,min=0.00 | mean=28.16 | max=1124.00
+number_of_reviews,int64,100.0,min=0.00 | mean=27.53 | max=4162.00
+last_review,str,68.5,2026-01-02 | 2026-01-01 | 2026-01-03
+reviews_per_month,float64,68.5,min=0.01 | mean=0.78 | max=119.14
+calculated_host_listings_count,int64,100.0,min=1.00 | mean=70.00 | max=1210.00
+availability_365,int64,100.0,min=0.00 | mean=165.03 | max=365.00
+number_of_reviews_ltm,int64,100.0,min=0.00 | mean=3.88 | max=1487.00
+license,str,13.7,Exempt | OSE-STRREG-0000437 | OSE-STRREG-0001957

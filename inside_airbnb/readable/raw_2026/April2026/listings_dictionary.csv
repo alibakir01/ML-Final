@@ -1,0 +1,91 @@
+﻿column,dtype,non_null_%,example_or_stats
+id,int64,100.0,min=6848.00 | mean=500709720942134464.00 | max=1654399243615198720.00
+listing_url,str,100.0,https://www.airbnb.com/rooms/6848 | https://www.airbnb.com/rooms/6872 | https://www.airbnb.com/rooms/6990
+scrape_id,int64,100.0,min=20260414135910.00 | mean=20260414135910.00 | max=20260414135910.00
+last_scraped,str,100.0,2026-04-15 | 2026-04-14 | 2026-04-16
+source,str,100.0,previous scrape | city scrape
+name,str,100.0,"Water View King Bed Hotel Room | Private bedroom -3 mins to shopping center | Cozy room@Queens! Same area W/Target,Costco"
+description,str,95.7,You'll have a great time at this comfortable place to stay. | Unique opportunity to live in the heart of New York City! Location is everything and this historic property is 1 block away from the most iconic location in all of New York : Times Square! | Keep it simple at this peaceful and centrally-located place.
+neighborhood_overview,float64,0.0,min=nan | mean=nan | max=nan
+picture_url,str,99.6,https://a0.muscache.com/pictures/6998e77e-4564-49e8-b652-61c90e84ee65.jpg | https://a0.muscache.com/pictures/hosting/Hosting-1498046003133858304/original/699fc415-a0da-4186-9189-ed82ada1b5d7.jpeg | https://a0.muscache.com/pictures/dc129afb-e2fc-42ea-8392-217917f247a0.jpg
+host_id,int64,100.0,min=1678.00 | mean=185550186.81 | max=754579027.00
+host_url,str,100.0,https://www.airbnb.com/users/show/107434423 | https://www.airbnb.com/users/show/446820235 | https://www.airbnb.com/users/show/51501835
+host_profile_id,float64,97.6,min=1462506270716056832.00 | mean=1467165765055158784.00 | max=1649332033617555456.00
+host_profile_url,str,97.4,https://www.airbnb.com/users/profile/1462889176402806013 | https://www.airbnb.com/users/profile/1463723014928495353 | https://www.airbnb.com/users/profile/1462719951971992762
+host_name,str,97.6,Blueground | Michael | Kristina
+host_since,float64,0.0,min=nan | mean=nan | max=nan
+hosts_time_as_user_years,float64,97.6,min=0.00 | mean=8.45 | max=17.00
+hosts_time_as_user_months,float64,97.6,min=0.00 | mean=5.59 | max=11.00
+hosts_time_as_host_years,float64,97.6,min=0.00 | mean=6.94 | max=15.00
+hosts_time_as_host_months,float64,97.6,min=0.00 | mean=5.42 | max=11.00
+host_location,str,77.1,"New York, NY | New York, United States | Dubai, United Arab Emirates"
+host_about,str,56.1,"Blueground is the world’s largest operator of fully furnished, move-in-ready apartments for flexible stays. Our professionally designed homes include fully equipped kitchens, fast Wi-Fi, premium linens, and smart entertainment, with access to gyms, pools, or outdoor spaces in select buildings. Enjoy instant online booking, simple self-check-in, and 24/7 support through the Blueground Guest App. Feel at home anywhere. | Great working experience in hospitality, Actually Hospitality and Guest Services is in our DNA and love to help people amd guide them about local culture activities and entertainments. | Are you tired of the tedious and time-consuming process of finding the right place to live? At Outpost Club, we think it should be as easy as grabbing your favorite cup of coffee. Our team - comprised of seasoned travelers - founded Outpost Club to make the process of relocating to a new city easier than ever before."
+host_response_time,float64,0.0,min=nan | mean=nan | max=nan
+host_response_rate,float64,0.0,min=nan | mean=nan | max=nan
+host_acceptance_rate,float64,0.0,min=nan | mean=nan | max=nan
+host_is_superhost,str,97.6,f | t
+host_thumbnail_url,float64,0.0,min=nan | mean=nan | max=nan
+host_picture_url,str,97.6,https://a0.muscache.com/im/pictures/user/d0ad9599-6fc0-4be6-865e-ffe99142517c.jpg?aki_policy=profile_x_medium | https://a0.muscache.com/im/Portrait/Avatars/messaging/b3e03835-ade9-4eb7-a0bb-2466ab9a534d.jpg?im_t=L&im_w=240&im_f=airbnb-cereal-medium.ttf&im_c=ffffff | https://a0.muscache.com/im/pictures/user/ddbc10fc-a6ac-47fd-8cae-75429d9f31c9.jpg?aki_policy=profile_x_medium
+host_neighbourhood,float64,0.0,min=nan | mean=nan | max=nan
+host_listings_count,float64,97.6,min=0.00 | mean=249.38 | max=5740.00
+host_total_listings_count,float64,0.0,min=nan | mean=nan | max=nan
+host_verifications,float64,0.0,min=nan | mean=nan | max=nan
+host_has_profile_pic,str,97.6,t | f
+host_identity_verified,str,97.6,t | f
+neighbourhood,float64,0.0,min=nan | mean=nan | max=nan
+neighbourhood_cleansed,str,100.0,Bedford-Stuyvesant | Midtown | Williamsburg
+neighbourhood_group_cleansed,str,100.0,Manhattan | Brooklyn | Queens
+latitude,float64,100.0,min=40.50 | mean=40.73 | max=40.91
+longitude,float64,100.0,min=-74.25 | mean=-73.95 | max=-73.71
+property_type,str,100.0,Entire rental unit | Private room in rental unit | Private room in home
+room_type,str,100.0,Entire home/apt | Private room | Hotel room
+accommodates,int64,100.0,min=1.00 | mean=2.78 | max=16.00
+bathrooms,float64,10.8,min=0.00 | mean=1.17 | max=7.00
+bathrooms_text,str,99.7,1 bath | 1 shared bath | 1 private bath
+bedrooms,float64,65.6,min=0.00 | mean=1.49 | max=16.00
+beds,float64,10.7,min=0.00 | mean=1.82 | max=21.00
+amenities,str,100.0,"[""Washer"", ""Carbon monoxide alarm"", ""Wifi"", ""Kitchen"", ""Air conditioning"", ""TV"", ""Smoke alarm""] | [] | [""Long term stays allowed"", ""Elevator"", ""Microwave"", ""Wifi"", ""Hangers"", ""Essentials"", ""Dishwasher"", ""Gym"", ""Pets allowed"", ""Smoke alarm"", ""Bed linens"", ""Iron"", ""Carbon monoxide alarm"", ""Heating"", ""Self check-in"", ""Shampoo"", ""Kitchen"", ""Crib"", ""TV"", ""Oven"", ""Lockbox"", ""Hot water"", ""High chair"", ""Cooking basics"", ""Coffee maker"", ""Refrigerator"", ""Private entrance"", ""Washer \u2013\u00a0In building"", ""Hair dryer"", ""Air conditioning"", ""Bathtub"", ""Dryer \u2013 In building""]"
+price,str,59.1,$55.33 | $59.13 | $165.93
+price_quote_checkin_date,str,62.6,2026-04-15 | 2026-04-16 | 2026-04-14
+price_quote_checkout_date,str,62.6,2026-05-15 | 2026-05-16 | 2026-04-16
+price_quote_total_price,float64,59.1,min=64.57 | mean=5070.87 | max=368372.00
+price_quote_price_per_night,float64,59.1,min=4.47 | mean=255.00 | max=15075.00
+price_quote_raw,str,62.6,"{""quote"": {""taxes"": null, ""currency"": null, ""date_match"": null, ""service_fee"": null, ""total_price"": null, ""cleaning_fee"": null, ""is_available"": null, ""discount_amount"": null, ""price_per_night"": null, ""nightly_subtotal"": null, ""discounted_subtotal"": null, ""raw_price_line_items"": null, ""returned_checkin_date"": null, ""requested_checkin_date"": ""2026-04-15"", ""returned_checkout_date"": null, ""requested_checkout_date"": ""2026-05-15""}} | {""quote"": {""taxes"": null, ""currency"": null, ""date_match"": null, ""service_fee"": null, ""total_price"": null, ""cleaning_fee"": null, ""is_available"": null, ""discount_amount"": null, ""price_per_night"": null, ""nightly_subtotal"": null, ""discounted_subtotal"": null, ""raw_price_line_items"": null, ""returned_checkin_date"": null, ""requested_checkin_date"": ""2026-04-16"", ""returned_checkout_date"": null, ""requested_checkout_date"": ""2026-05-16""}} | {""quote"": {""taxes"": null, ""currency"": null, ""date_match"": null, ""service_fee"": null, ""total_price"": null, ""cleaning_fee"": null, ""is_available"": false, ""discount_amount"": null, ""price_per_night"": null, ""nightly_subtotal"": null, ""discounted_subtotal"": null, ""raw_price_line_items"": [], ""returned_checkin_date"": null, ""requested_checkin_date"": ""2026-04-16"", ""returned_checkout_date"": null, ""requested_checkout_date"": ""2026-04-17""}}"
+minimum_nights,float64,100.0,min=1.00 | mean=27.85 | max=1124.00
+maximum_nights,float64,100.0,min=1.00 | mean=1226647.22 | max=2147483647.00
+minimum_minimum_nights,float64,100.0,min=1.00 | mean=27.85 | max=1124.00
+maximum_minimum_nights,float64,100.0,min=1.00 | mean=36.22 | max=1124.00
+minimum_maximum_nights,float64,100.0,min=1.00 | mean=245835.56 | max=2147483647.00
+maximum_maximum_nights,float64,100.0,min=1.00 | mean=1226647.22 | max=2147483647.00
+minimum_nights_avg_ntm,float64,100.0,min=1.00 | mean=28.76 | max=1124.00
+maximum_nights_avg_ntm,float64,100.0,min=1.00 | mean=418957.43 | max=2147483647.00
+calendar_updated,float64,0.0,min=nan | mean=nan | max=nan
+has_availability,str,83.9,t | f
+availability_30,int64,100.0,min=0.00 | mean=10.37 | max=30.00
+availability_60,int64,100.0,min=0.00 | mean=22.44 | max=60.00
+availability_90,int64,100.0,min=0.00 | mean=35.05 | max=90.00
+availability_365,int64,100.0,min=0.00 | mean=157.04 | max=365.00
+calendar_last_scraped,str,100.0,2026-04-15 | 2026-04-14 | 2026-04-16
+number_of_reviews,int64,100.0,min=0.00 | mean=28.64 | max=4310.00
+number_of_reviews_ltm,int64,100.0,min=0.00 | mean=4.02 | max=1338.00
+number_of_reviews_l30d,int64,100.0,min=0.00 | mean=0.25 | max=90.00
+availability_eoy,int64,100.0,min=0.00 | mean=114.56 | max=262.00
+number_of_reviews_ly,int64,100.0,min=0.00 | mean=3.94 | max=1557.00
+estimated_occupancy_l365d,int64,100.0,min=0.00 | mean=46.09 | max=255.00
+estimated_revenue_l365d,float64,59.1,min=0.00 | mean=16899.12 | max=1093568.00
+first_review,str,70.0,2023-01-01 | 2016-01-02 | 2019-01-01
+last_review,str,70.0,2026-03-31 | 2026-03-29 | 2026-03-30
+review_scores_rating,float64,70.0,min=0.00 | mean=4.72 | max=5.00
+review_scores_accuracy,float64,70.0,min=0.00 | mean=4.76 | max=5.00
+review_scores_cleanliness,float64,70.0,min=0.00 | mean=4.66 | max=5.00
+review_scores_checkin,float64,70.0,min=0.00 | mean=4.83 | max=5.00
+review_scores_communication,float64,70.0,min=0.00 | mean=4.82 | max=5.00
+review_scores_location,float64,70.0,min=0.00 | mean=4.75 | max=5.00
+review_scores_value,float64,70.0,min=0.00 | mean=4.63 | max=5.00
+license,str,14.4,Exempt | OSE-STRREG-0000437 | OSE-STRREG-0001957
+instant_bookable,float64,0.0,min=nan | mean=nan | max=nan
+calculated_host_listings_count,int64,100.0,min=1.00 | mean=54.83 | max=1090.00
+calculated_host_listings_count_entire_homes,int64,100.0,min=0.00 | mean=46.96 | max=1090.00
+calculated_host_listings_count_private_rooms,int64,100.0,min=0.00 | mean=7.03 | max=230.00
+calculated_host_listings_count_shared_rooms,int64,100.0,min=0.00 | mean=0.07 | max=20.00
+reviews_per_month,float64,70.0,min=0.01 | mean=0.78 | max=116.80
