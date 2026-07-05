@@ -50,7 +50,7 @@ test set. The target is a censored, zero-inflated count in $[0,92]$, with a
 $53.5\%$ mass at zero, which makes it a challenging demand-forecasting task.
 Starting from five raw tables (one static property table and two quarters of
 daily listing histories totalling more than eight million rows), a flat matrix
-of 150 features per property is engineered, covering price dynamics, availability
+of 149 features per property is engineered, covering price dynamics, availability
 and booking behaviour, status churn, recency, a quarter-over-quarter demand
 proxy, text keywords from listing titles, and geographic clusters. Five
 regressors---Linear Regression, Random Forest, Gradient Boosting, XGBoost, and a
@@ -181,7 +181,7 @@ found that review-sentiment features moved their error more than the choice
 between a regularized linear model and a tree ensemble. This is consistent with
 the broader observation that on tabular problems the ceiling is usually set by how
 much signal the practitioner can encode, and it is precisely why most effort
-went into the 150-feature matrix, with the model comparison treated as a
+went into the 149-feature matrix, with the model comparison treated as a
 secondary, if still important, step. It also explains why a competition with a
 fixed, shared dataset is decided largely by feature engineering and validation
 discipline rather than by access to a particular algorithm---an observation that
@@ -419,7 +419,7 @@ Column & Missing rate \\
 
 \subsection{Feature Engineering}
 The core of the project was turning the three raw tables into a single flat
-matrix with one row per \texttt{PropertyID}. The result is 150 features (144
+matrix with one row per \texttt{PropertyID}. The result is 149 features (143
 numeric and 6 categorical). They fall into the following groups.
 \begin{itemize}
 \item \textbf{Per-quarter base aggregates (Q1, Q2, and combined H1).} For each
@@ -457,7 +457,7 @@ latitude/longitude to give every property a neighbourhood cluster label, which
 is cheaper and more robust than using the raw zip code as a category.
 \end{itemize}
 
-In total this produced 150 features, of which 143 are numeric and 6 are
+In total this produced 149 features, of which 143 are numeric and 6 are
 categorical. Table~\ref{tab:featgroups} summarizes the families and a
 representative member of each. The dominant families by count are the
 per-quarter behavioural aggregates and the recency window, which is consistent
@@ -465,7 +465,7 @@ with the correlation analysis (Fig.~\ref{fig:corr}) and with the
 feature-importance ranking reported later (Fig.~\ref{fig:importance}).
 
 \begin{table}[!t]
-\caption{Engineered feature families (150 features total: 143 numeric,
+\caption{Engineered feature families (149 features total: 143 numeric,
 6 categorical).}
 \label{tab:featgroups}
 \centering
@@ -534,11 +534,11 @@ complementary folds,
 \qquad i\in\mathcal{F}_k,
 \label{eq:kfoldte}
 \end{equation}
-where $e^{\,(-\mathcal{F}_k)}_{c}$ is \eqref{eq:smooth} evaluated on
+where $e^{\,(-\mathcal{F}_k)}_{c}$ is the smoothing formula above evaluated on
 $\{(\mathbf{x}_j,y_j):j\notin\mathcal{F}_k\}$. At transform time (validation and
 test rows), the full-data map is used.
 
-To make \eqref{eq:smooth} concrete, consider a neighbourhood that appears in
+To make the smoothing formula concrete, consider a neighbourhood that appears in
 $n_c=4$ training rows with a local mean of $\bar y_c=40$ booked nights, against a
 global mean of $\mu=18.55$. With $\alpha=20$ the encoded value is
 $e_c=\frac{4\cdot 40+20\cdot 18.55}{4+20}=\frac{160+371}{24}\approx 22.1$, i.e.\
@@ -636,9 +636,9 @@ predictions to the count scale. This does not contradict the decision to
 trees are invariant to monotone feature scaling and optimize the raw-scale loss
 directly, so for them the transform only distorted the objective, whereas for the
 MLP it is a numerical-stability aid. Batch normalization
-\eqref{eq:bn} keeps the pre-activations well scaled across the three hidden
-layers, and dropout ($p=0.2$) plus the $L_2$ weight decay in \eqref{eq:adam}
-regularize a network that would otherwise overfit a 19{,}497-row table with 150
+(defined above) keeps the pre-activations well scaled across the three hidden
+layers, and dropout ($p=0.2$) plus the $L_2$ weight decay in the Adam update
+above regularize a network that would otherwise overfit a 19{,}497-row table with 149
 inputs.
 
 \subsection{Hyper-Parameter Tuning}
@@ -710,7 +710,7 @@ $\{\mathcal{D}_k\}_{k=1}^{K}$, budget $N$, tree cap $B_{\max}$.
 Table~\ref{tab:search}.
 \item For each fold $k=1,\dots,K$: fit the preprocessing on the training part,
 carve an inner validation set $\mathcal{V}_k$, grow up to $B_{\max}$ trees, pick
-the early-stop iteration $b_k^{*}$ by \eqref{eq:earlystop}, and record
+the early-stop iteration $b_k^{*}$ by the early-stopping rule above, and record
 $m_k=\mathrm{MSE}$ on $\mathcal{D}_k$ using $b_k^{*}$ trees.
 \item Set $s=\frac{1}{K}\sum_k m_k$ and log $(\theta,s)$; if $s<s^{*}$, update
 $s^{*}\leftarrow s$, $\theta^{*}\leftarrow\theta$.
@@ -770,21 +770,23 @@ predictions staying on the valid scale:
 & 0 \le w_j \le 1,\quad j=1,\dots,m.
 \label{eq:blendbox}
 \end{align}
-The equality constraint~\eqref{eq:blendeq} and the box
-bounds~\eqref{eq:blendbox} make the solution a \emph{convex combination}, which
+The equality constraint above and the box
+bounds above make the solution a \emph{convex combination}, which
 keeps the blend on the same scale as the inputs and prevents any single model
-from receiving a runaway weight. Problem \eqref{eq:blendobj}--\eqref{eq:blendbox} is solved
+from receiving a runaway weight. This constrained problem is solved
 with Sequential Least-Squares Quadratic Programming (SLSQP) via
 \texttt{scipy.optimize.minimize}, starting from the uniform point
 $w_j^{(0)}=1/m$ with \texttt{ftol}~$=10^{-9}$. As a post-processing step, weights below $10^{-4}$
 are zeroed and the rest renormalized so that
-\eqref{eq:blendeq} still holds exactly. A randomized search over the
+the weights still sum to one exactly. A randomized search over the
 weight simplex yields the same optimum,
 which confirms that the SLSQP solution is consistent with the course's core
 techniques rather than an artefact of the external optimizer. The optimizer
-concentrated most of the weight on XGBoost ($\approx0.73$) and gave smaller,
-non-zero weights to the MLP ($\approx0.14$), Linear Regression ($\approx0.10$),
-and Random Forest ($\approx0.03$), while Gradient Boosting was dropped to zero
+concentrated the largest share of weight on XGBoost ($\approx0.34$), with
+substantial secondary weight on XGBoost v3 ($\approx0.26$) and LightGBM
+($\approx0.20$), a smaller contribution from the MLP ($\approx0.11$), modest
+weight on Linear Regression ($\approx0.06$) and CatBoost ($\approx0.03$), while
+Random Forest and Gradient Boosting were both dropped to zero
 (Table~\ref{tab:weights}). The full procedure is given in Algorithm~2.
 
 \vspace{2pt}
@@ -813,14 +815,14 @@ metric, while MAE and $R^2$ are also tracked internally because they are easier 
 read. To prevent leakage, (i) every preprocessing step is fitted only on
 the training fold, (ii) no feature is built from Q3 2016 information, and (iii)
 target encodings are computed inside their own inner $K$-fold per
-\eqref{eq:kfoldte}. As a last step, predictions are clipped to $[0,92]$ and rounded
+the target-encoding formula above. As a last step, predictions are clipped to $[0,92]$ and rounded
 them to integers, both because the competition requires integer predictions and
 because no property can be booked more than 92 nights in a quarter.
 
 \subsection{Computational Cost}
 \label{sec:cost}
 Because the experiments ran on a single workstation rather than a cluster,
-computational cost was monitored throughout. Building the 150-feature matrix from the eight
+computational cost was monitored throughout. Building the 149-feature matrix from the eight
 million daily rows is a one-time aggregation that dominates wall-clock time but
 is trivially parallelizable over properties. Model training is cheap by
 comparison: a single early-stopped XGBoost fit converges at $\approx$294 trees
@@ -876,8 +878,9 @@ the choice of a particular boosting library.
 
 \begin{table}[!t]
 \caption{Model comparison by 5-fold CV on the development set (19{,}497
-properties; lower MSE/MAE and higher $R^2$ are better). LightGBM and CatBoost are
-state-of-the-art external baselines trained with the identical pipeline.}
+properties; lower MSE/MAE and higher $R^2$ are better). LightGBM and CatBoost
+are non-course boosting libraries trained with the identical pipeline and also
+included as blend members (Table~\ref{tab:weights}).}
 \label{tab:cv}
 \centering
 \begin{tabular}{lccc}
@@ -889,8 +892,8 @@ GradientBoosting & 245.3 & 8.46 & 0.683 \\
 RandomForest & 194.2 & 8.55 & 0.749 \\
 MLP & 217.6 & 8.03 & 0.718 \\
 \midrule
-LightGBM (SOTA baseline) & 184.1 & 8.24 & 0.762 \\
-CatBoost (SOTA baseline) & 184.3 & 8.27 & 0.762 \\
+LightGBM & 184.1 & 8.24 & 0.762 \\
+CatBoost & 184.3 & 8.27 & 0.762 \\
 XGBoost (tuned, proposed) & 182.2 & 8.18 & 0.764 \\
 \textbf{SLSQP weighted blend (proposed)} & \textbf{180.0} & \textbf{8.11} & \textbf{0.767} \\
 \bottomrule
@@ -929,7 +932,7 @@ opposite term---bagging averages many high-variance trees to cut variance---but,
 because every tree is grown to near-purity on the same features, it leaves a
 residual bias that boosting can still reduce. Gradient boosting lowers bias by
 fitting residuals stage by stage, and XGBoost adds the regularization and early
-stopping \eqref{eq:xgbobj}--\eqref{eq:earlystop} that keep the corresponding
+stopping (the regularized objective and early-stopping rule above) that keep the corresponding
 variance in check, which is why it sits at the bottom of the MSE column. The MLP
 is capable of low bias in principle, but on 19{,}497 rows it is variance-limited
 without heavier regularization, which is exactly why batch normalization and
@@ -975,7 +978,7 @@ Table~\ref{tab:weights} lists the optimal weights.
 
 \begin{table}[!t]
 \caption{Optimal blend weights chosen by SLSQP on the OOF predictions
-(problem~\eqref{eq:blendobj}--\eqref{eq:blendbox}).}
+(the constrained blend problem in Section~\ref{sec:blend}).}
 \label{tab:weights}
 \centering
 \begin{tabular}{lc}
@@ -1267,8 +1270,8 @@ for the tree models, which exploit those encoded splits, than for the linear one
 the tuned XGBoost under the same preprocessing lowers the MSE by a further $25.2$
 (207.4 to 182.2). The ensemble axis confirms that naive equal-weight averaging
 (186.5) is \emph{worse} than the best single model, because the weaker learners
-drag the mean down; only the constrained convex optimisation of
-\eqref{eq:blendobj}--\eqref{eq:blendbox} produces a net gain (180.0), by
+drag the mean down; only the constrained convex optimisation described in
+Section~\ref{sec:blend} produces a net gain (180.0), by
 concentrating weight on the complementary models and assigning zero weight to the
 redundant Gradient Boosting learner (Table~\ref{tab:weights}). Clipping and
 integer rounding add a negligible $+0.07$ MSE.
@@ -1301,23 +1304,24 @@ encodings and the geographic-cluster feature, so the host identifier is excluded
 randomized search is used instead of an off-the-shelf cross-validated search
 because fold-level early stopping with an XGBoost \texttt{eval\_set} cannot be
 expressed cleanly by the latter. The custom loop preserves the random-sampling
-philosophy of \cite{bergstra2012random} and \eqref{eq:searchobj} but additionally
-lets each fold stop at its own best iteration \eqref{eq:earlystop} and logs every
-trial for inspection.
+philosophy of \cite{bergstra2012random} and the search objective defined
+earlier but additionally lets each fold stop at its own best iteration using
+the early-stopping rule defined earlier and logs every trial for inspection.
 
 %==============================================================================
 \section{Conclusions}
 \label{sec:concl}
 This work presented a complete, leakage-safe machine-learning pipeline for
 forecasting quarterly short-term-rental demand in New York City, a censored,
-zero-inflated regression task. From five raw tables, 150 per-property features
-were engineered; five regressors were compared under 5-fold cross-validation;
-XGBoost was tuned with an early-stopping randomized search; and the learners were
-combined through an SLSQP-optimised convex blend. The blend attains an
-out-of-fold MSE of 180.0 and a held-out test MSE of 185.499, outperforming the
-best single model and two state-of-the-art gradient-boosting baselines
-(LightGBM and CatBoost); the improvement is statistically significant
-(Section~\ref{sec:significance}).
+zero-inflated regression task. From five raw tables, 149 per-property features
+were engineered; five course-taught regressors were compared under 5-fold
+cross-validation and later extended, in this revision, with LightGBM, CatBoost,
+and an additional XGBoost configuration as non-course comparison and blend
+members; XGBoost was tuned with an early-stopping randomized search; and the
+learners were combined through an SLSQP-optimised convex blend. The blend
+attains an out-of-fold MSE of 180.0 and a held-out test MSE of 185.499,
+outperforming every individual model compared, including LightGBM and CatBoost;
+the improvement is statistically significant (Section~\ref{sec:significance}).
 
 Three findings carry beyond this dataset. Most of the predictive power comes from
 the daily listing histories rather than the static property table, so temporal
@@ -1391,7 +1395,7 @@ and the random-search sampler. The pipeline is implemented in Python~3.13 with
 scikit-learn~1.8.0 (preprocessing, linear, random-forest and gradient-boosting
 models, cross-validation), XGBoost~3.2.0, PyTorch~2.12 (CPU build) with Adam for
 the MLP, SciPy~1.17.0 for the SLSQP blend, and LightGBM~4.6.0 and CatBoost~1.2.10
-for the external baselines. All experiments were run on a single workstation with
+for the non-course comparison models. All experiments were run on a single workstation with
 an AMD (Zen~3) multi-core CPU and no GPU. Representative wall-clock times are:
 one 5-fold XGBoost evaluation $\approx$10.6\,s, the full 60-configuration search
 $\approx$10.6\,min, a 5-fold LightGBM evaluation $\approx$18\,s, a 5-fold CatBoost
@@ -1401,8 +1405,8 @@ recomputed without retraining.
 
 \section{Engineered Feature Inventory}
 \label{app:features}
-Table~\ref{tab:featinventory} documents the 150 engineered features (143 numeric,
-7 categorical) by family, with their source tables and a representative
+Table~\ref{tab:featinventory} documents the 149 engineered features (143 numeric,
+6 categorical) by family, with their source tables and a representative
 mathematical definition, so that the feature matrix can be reproduced. Per-quarter
 aggregates are computed independently for Q1, Q2, and the combined first half
 (H1); rates are normalised by the number of days a listing is observed in the

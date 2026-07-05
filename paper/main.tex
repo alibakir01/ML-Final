@@ -54,7 +54,7 @@ the total number of nights booked in the third quarter of 2016 for around
 24{,}000 Airbnb properties in New York City; submissions are ranked by Mean
 Squared Error (MSE). Starting from five raw CSV files (one static property
 table and two quarters of daily listing histories totalling more than eight
-million rows), we engineered a flat matrix of 150 features per property
+million rows), we engineered a flat matrix of 149 features per property
 covering price dynamics, availability and booking behaviour, status churn,
 recency, a quarter-over-quarter demand proxy, text keywords from listing
 titles, and geographic clusters. We then compared five models taught in the
@@ -113,11 +113,15 @@ Prediction Competition -- K353'' \cite{k353comp}. The goal is to predict, for
 every property in a held-out New York City test set, the total number of nights
 booked during the third quarter (July, August, and September) of 2016. Because
 a quarter contains 92 days, the target is an integer between 0 and 92, and the
-competition scores submissions purely by Mean Squared Error. The whole project
-was constrained in one important way: every model and optimization algorithm we
-use has to come from the COMP468 course modules, so deliberately popular Kaggle
-tools such as CatBoost or LightGBM were off the table for us and we did not use
-them.
+competition scores submissions purely by Mean Squared Error. The graded Kaggle
+entry itself was constrained in one important way: every model and optimization
+algorithm used for that submission had to come from the COMP468 course modules,
+so deliberately popular Kaggle tools such as CatBoost or LightGBM were off the
+table for the entry we submitted. This report's later revision, addressing
+peer-review feedback, additionally evaluates LightGBM and CatBoost as
+non-course comparison models and blend members (Section~\ref{sec:blend}); their
+results are reported throughout the paper but were not part of the graded
+Kaggle submission.
 
 This report is organized as follows. Section~\ref{sec:lit} reviews the most
 relevant prior work on Airbnb prediction, decision-tree ensembles,
@@ -186,7 +190,7 @@ found that review-sentiment features moved their error more than the choice
 between a regularized linear model and a tree ensemble. This is consistent with
 the broader observation that on tabular problems the ceiling is usually set by how
 much signal the practitioner can encode, and it is precisely why we invested most
-of our effort in the 150-feature matrix and treated the model comparison as a
+of our effort in the 149-feature matrix and treated the model comparison as a
 secondary, if still important, step. It also explains why a competition with a
 fixed, shared dataset is decided largely by feature engineering and validation
 discipline rather than by access to a particular algorithm---an observation that
@@ -434,7 +438,7 @@ Column & Missing rate \\
 
 \subsection{Feature Engineering}
 The core of the project was turning the three raw tables into a single flat
-matrix with one row per \texttt{PropertyID}. We ended up with 150 features (144
+matrix with one row per \texttt{PropertyID}. We ended up with 149 features (143
 numeric and 6 categorical). They fall into the following groups.
 \begin{itemize}
 \item \textbf{Per-quarter base aggregates (Q1, Q2, and combined H1).} For each
@@ -472,7 +476,7 @@ latitude/longitude to give every property a neighbourhood cluster label, which
 is cheaper and more robust than using the raw zip code as a category.
 \end{itemize}
 
-In total this produced 150 features, of which 143 are numeric and 6 are
+In total this produced 149 features, of which 143 are numeric and 6 are
 categorical. Table~\ref{tab:featgroups} summarizes the families and a
 representative member of each. The dominant families by count are the
 per-quarter behavioural aggregates and the recency window, which is consistent
@@ -480,7 +484,7 @@ with the correlation analysis (Fig.~\ref{fig:corr}) and with the
 feature-importance ranking we report later (Fig.~\ref{fig:importance}).
 
 \begin{table}[!t]
-\caption{Engineered feature families (150 features total: 143 numeric,
+\caption{Engineered feature families (149 features total: 143 numeric,
 6 categorical).}
 \label{tab:featgroups}
 \centering
@@ -549,11 +553,11 @@ complementary folds,
 \qquad i\in\mathcal{F}_k,
 \label{eq:kfoldte}
 \end{equation}
-where $e^{\,(-\mathcal{F}_k)}_{c}$ is \eqref{eq:smooth} evaluated on
+where $e^{\,(-\mathcal{F}_k)}_{c}$ is the smoothing formula above evaluated on
 $\{(\mathbf{x}_j,y_j):j\notin\mathcal{F}_k\}$. At transform time (validation and
 test rows) we use the full-data map.
 
-To make \eqref{eq:smooth} concrete, consider a neighbourhood that appears in
+To make the smoothing formula concrete, consider a neighbourhood that appears in
 $n_c=4$ training rows with a local mean of $\bar y_c=40$ booked nights, against a
 global mean of $\mu=18.55$. With $\alpha=20$ the encoded value is
 $e_c=\frac{4\cdot 40+20\cdot 18.55}{4+20}=\frac{160+371}{24}\approx 22.1$, i.e.\
@@ -653,9 +657,9 @@ predictions to the count scale. This is not a contradiction with our decision to
 trees are invariant to monotone feature scaling and optimize the raw-scale loss
 directly, so for them the transform only distorted the objective, whereas for the
 MLP it is a numerical-stability aid. Batch normalization
-\eqref{eq:bn} keeps the pre-activations well scaled across the three hidden
-layers, and dropout ($p=0.2$) plus the $L_2$ weight decay in \eqref{eq:adam}
-regularize a network that would otherwise overfit a 19{,}497-row table with 150
+(defined above) keeps the pre-activations well scaled across the three hidden
+layers, and dropout ($p=0.2$) plus the $L_2$ weight decay in the Adam update
+above regularize a network that would otherwise overfit a 19{,}497-row table with 149
 inputs.
 
 \subsection{Hyper-Parameter Tuning}
@@ -727,7 +731,7 @@ $\{\mathcal{D}_k\}_{k=1}^{K}$, budget $N$, tree cap $B_{\max}$.
 Table~\ref{tab:search}.
 \item For each fold $k=1,\dots,K$: fit the preprocessing on the training part,
 carve an inner validation set $\mathcal{V}_k$, grow up to $B_{\max}$ trees, pick
-the early-stop iteration $b_k^{*}$ by \eqref{eq:earlystop}, and record
+the early-stop iteration $b_k^{*}$ by the early-stopping rule above, and record
 $m_k=\mathrm{MSE}$ on $\mathcal{D}_k$ using $b_k^{*}$ trees.
 \item Set $s=\frac{1}{K}\sum_k m_k$ and log $(\theta,s)$; if $s<s^{*}$, update
 $s^{*}\leftarrow s$, $\theta^{*}\leftarrow\theta$.
@@ -787,21 +791,23 @@ predictions staying on the valid scale:
 & 0 \le w_j \le 1,\quad j=1,\dots,m.
 \label{eq:blendbox}
 \end{align}
-The equality constraint~\eqref{eq:blendeq} and the box
-bounds~\eqref{eq:blendbox} make the solution a \emph{convex combination}, which
+The equality constraint above and the box
+bounds above make the solution a \emph{convex combination}, which
 keeps the blend on the same scale as the inputs and prevents any single model
-from receiving a runaway weight. We solve \eqref{eq:blendobj}--\eqref{eq:blendbox}
+from receiving a runaway weight. We solve this constrained problem
 with Sequential Least-Squares Quadratic Programming (SLSQP) via
 \texttt{scipy.optimize.minimize}, starting from the uniform point
 $w_j^{(0)}=1/m$ with \texttt{ftol}~$=10^{-9}$. As a post-processing step we zero
 out negligible weights ($w_j<10^{-4}$) and renormalize so that
-\eqref{eq:blendeq} still holds exactly. We also ran a randomized search over the
+the weights still sum to one exactly. We also ran a randomized search over the
 weight simplex (following the logic of Module~9.1) and obtained the same optimum,
 which confirms that the SLSQP solution is consistent with the course's core
 techniques rather than an artefact of the external optimizer. The optimizer
-concentrated most of the weight on XGBoost ($\approx0.73$) and gave smaller,
-non-zero weights to the MLP ($\approx0.14$), Linear Regression ($\approx0.10$),
-and Random Forest ($\approx0.03$), while Gradient Boosting was dropped to zero
+concentrated the largest share of weight on XGBoost ($\approx0.34$), with
+substantial secondary weight on XGBoost v3 ($\approx0.26$) and LightGBM
+($\approx0.20$), a smaller contribution from the MLP ($\approx0.11$), modest
+weight on Linear Regression ($\approx0.06$) and CatBoost ($\approx0.03$), while
+Random Forest and Gradient Boosting were both dropped to zero
 (Table~\ref{tab:weights}). The full procedure is given in Algorithm~2.
 
 \vspace{2pt}
@@ -830,14 +836,14 @@ metric, but we also track MAE and $R^2$ internally because they are easier to
 read (Module~4). To stop leakage, we (i) fit every preprocessing step only on
 the training fold, (ii) build no feature from Q3 2016 information, and (iii)
 compute target encodings inside their own inner $K$-fold per
-\eqref{eq:kfoldte}. As a last step we clip predictions to $[0,92]$ and round
+the target-encoding formula above. As a last step we clip predictions to $[0,92]$ and round
 them to integers, both because the competition requires integer predictions and
 because no property can be booked more than 92 nights in a quarter.
 
 \subsection{Computational Cost}
 \label{sec:cost}
 Because the project had to run on a single workstation rather than a cluster, we
-kept an eye on cost throughout. Building the 150-feature matrix from the eight
+kept an eye on cost throughout. Building the 149-feature matrix from the eight
 million daily rows is a one-time aggregation that dominates wall-clock time but
 is trivially parallelizable over properties. Model training is cheap by
 comparison: a single early-stopped XGBoost fit converges at $\approx$294 trees
@@ -939,7 +945,7 @@ opposite term---bagging averages many high-variance trees to cut variance---but,
 because every tree is grown to near-purity on the same features, it leaves a
 residual bias that boosting can still reduce. Gradient boosting lowers bias by
 fitting residuals stage by stage, and XGBoost adds the regularization and early
-stopping \eqref{eq:xgbobj}--\eqref{eq:earlystop} that keep the corresponding
+stopping (the regularized objective and early-stopping rule above) that keep the corresponding
 variance in check, which is why it sits at the bottom of the MSE column. The MLP
 is capable of low bias in principle, but on 19{,}497 rows it is variance-limited
 without heavier regularization, which is exactly why batch normalization and
@@ -985,7 +991,7 @@ Table~\ref{tab:weights} lists the optimal weights.
 
 \begin{table}[!t]
 \caption{Optimal blend weights chosen by SLSQP on the OOF predictions
-(problem~\eqref{eq:blendobj}--\eqref{eq:blendbox}).}
+(the constrained blend problem in Section~\ref{sec:blend}).}
 \label{tab:weights}
 \centering
 \begin{tabular}{lc}
@@ -1249,15 +1255,15 @@ plan was to use scikit-learn's \texttt{RandomizedSearchCV}. We changed to a
 hand-written randomized search because we wanted fold-level early stopping with an
 XGBoost \texttt{eval\_set}, which \texttt{RandomizedSearchCV} cannot express
 cleanly. The custom loop fits the same idea---random sampling of log-uniform
-hyper-parameters, 5-fold CV per \eqref{eq:searchobj}---but additionally lets each
-fold stop at its own best iteration \eqref{eq:earlystop} and logs every trial to
+hyper-parameters, 5-fold CV per the search objective defined earlier---but additionally lets each
+fold stop at its own best iteration using the early-stopping rule defined earlier and logs every trial to
 a CSV for later inspection. The search philosophy is unchanged from
 \cite{bergstra2012random}; only the implementation differs.
 
 \paragraph{Added a weighted model blend} This was not in the midterm at all. The
 midterm described comparing the four model families and picking the best one.
 Once we had honest out-of-fold predictions for every model, blending them with
-SLSQP-optimised weights per \eqref{eq:blendobj}--\eqref{eq:blendbox} was a cheap
+SLSQP-optimised weights per the constrained blend problem in Section~\ref{sec:blend} was a cheap
 way to gain another $\approx$2\% MSE, so we added it as the final step
 \cite{wolpert1992stacked}. It is the blend, not a single model, that produced our
 top leaderboard score, and Section~\ref{sec:significance} confirms the gain is
@@ -1276,14 +1282,17 @@ details that only reveal themselves once you measure them.
 \label{sec:concl}
 In this project we built a complete, leakage-safe machine-learning pipeline to
 predict Q3 2016 Airbnb booking counts in New York City, using only the models and
-optimizers taught in COMP468. Starting from five raw CSV files we engineered 150
-per-property features, compared five models with 5-fold cross-validation, retuned
-XGBoost with a custom early-stopping randomized search, and combined the best
-models with an SLSQP-optimised weighted blend. The blend scored 185.499 MSE on
-Kaggle and ranked our team first among the six competing teams, and its
-leaderboard score matched our internal cross-validation closely, which gives us
-confidence that the result is real and not an artefact of leaderboard
-overfitting.
+optimizers taught in COMP468 for the graded Kaggle submission. Starting from
+five raw CSV files we engineered 149 per-property features, compared five
+course models with 5-fold cross-validation, retuned XGBoost with a custom
+early-stopping randomized search, and combined the best models with an
+SLSQP-optimised weighted blend; this report's later revision additionally
+evaluates LightGBM, CatBoost, and two further XGBoost configurations as
+non-course comparison and blend members (Section~\ref{sec:blend}). The
+course-only blend scored 185.499 MSE on Kaggle and ranked our team first among
+the six competing teams, and its leaderboard score matched our internal
+cross-validation closely, which gives us confidence that the result is real and
+not an artefact of leaderboard overfitting.
 
 The clearest lessons for us were practical ones. Most of the predictive power
 came from the daily listing histories, not the static property table, so the time
@@ -1322,7 +1331,7 @@ whose demand is \emph{accelerating} into Q3 is distinguished from one that is
 merely busy on average. Light geographic smoothing, in which each property's
 neighbourhood target encoding is blended with the encodings of adjacent K-Means
 clusters, could further stabilize the estimate for thinly populated areas, in the
-same spirit as the additive smoothing already in \eqref{eq:smooth}. Third, with a
+same spirit as the additive smoothing formula already used for target encoding. Third, with a
 larger compute budget we would tune the MLP more carefully. The error-correlation
 analysis (Table~\ref{tab:errcorr}) showed the MLP is the least correlated with
 XGBoost, so a stronger MLP is the most promising single way to improve the
@@ -1363,12 +1372,18 @@ teams, 9 submissions). Most recent submission: 185.642 MSE. The screenshot of th
 leaderboard at the time of writing is included with the submission package.
 
 \vspace{4pt}
-\noindent\textbf{Scope statement.} Models used in the submitted solution are
-restricted to COMP468 course material: Linear Regression, Random Forest, Gradient
-Boosting, XGBoost, and a PyTorch MLP trained with Adam, combined by a convex
-weighted blend. No external models (e.g.\ CatBoost or LightGBM) were used. We did
-not use Kaggle notebooks or Colab for training; we used GitHub and a local IDE,
-and uploaded submission \texttt{.csv} files to Kaggle manually.
+\noindent\textbf{Scope statement.} Models used in the graded Kaggle submission
+(the leaderboard score above) are restricted to COMP468 course material: Linear
+Regression, Random Forest, Gradient Boosting, XGBoost, and a PyTorch MLP
+trained with Adam, combined by a convex weighted blend; no external models
+(e.g.\ CatBoost or LightGBM) were part of that submitted \texttt{.csv}. This
+report's later revision additionally evaluates LightGBM, CatBoost, and two
+further XGBoost configurations as non-course comparison models and blend
+members (Table~\ref{tab:weights}, Section~\ref{sec:blend}); those results were
+not resubmitted to Kaggle and are reported here purely for the written
+analysis. We did not use Kaggle notebooks or Colab for training; we used
+GitHub and a local IDE, and uploaded submission \texttt{.csv} files to Kaggle
+manually.
 
 
 \section{Complete Feature Inventory}

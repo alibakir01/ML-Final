@@ -224,43 +224,32 @@ for p in d.paragraphs:
         if 'Section' in r.text:
             r.text = pat.sub(lambda m: 'Section ' + sec_map[m.group(2)], r.text)
 
-# ---------------------------------------------------------------- full-width appendix table
-# The "Complete Feature Inventory" table has 6 columns and is unreadable squeezed
-# into a single ~3.3in two-column-layout column, so give it (and everything from
-# its heading onward) its own single-column, full-page-width section.
-inventory_heading = None
-for i, p in enumerate(d.paragraphs):
-    if p.style.name == 'Heading 1' and 'Complete Feature Inventory' in p.text:
-        inventory_heading = i
-        break
-
-if inventory_heading is not None and inventory_heading > 0:
-    prev_p = d.paragraphs[inventory_heading - 1]
-    pPr = prev_p._p.get_or_add_pPr()
-    pPr.append(build_sectPr(2, continuous=True))
-    for c in body_sp.findall(qn('w:cols')):
-        body_sp.remove(c)
-    docGrid = body_sp.find(qn('w:docGrid'))
-    cols1 = make_cols(1)
-    if docGrid is not None:
-        docGrid.addprevious(cols1)
-    else:
-        body_sp.append(cols1)
-    inv_table = d.tables[-1]
-    tbl = inv_table._tbl
-    tblPr = tbl.tblPr
-    for old in tblPr.findall(qn('w:tblW')):
-        tblPr.remove(old)
-    tblW = OxmlElement('w:tblW')
-    tblW.set(qn('w:w'), str(int(7.0 * TW)))
-    tblW.set(qn('w:type'), 'dxa')
-    tblPr.append(tblW)
-    col_w = Emu(int(7.0 / 6 * 914400))
-    for col in inv_table.columns:
-        col.width = col_w
-    for row in inv_table.rows:
-        for cell in row.cells:
-            cell.width = col_w
+# ---------------------------------------------------------------- feature-inventory table widths
+# The 2-column "Complete Feature Inventory" longtable flows in the normal
+# 2-column body (~3.30in per column), but pandoc doesn't reliably carry over
+# the LaTeX p{2.2in}p{0.8in} column spec, so set it explicitly here with a
+# FIXED layout (otherwise Word autofits and wraps "float"/"integer" badly).
+inv_table = d.tables[-1]
+tbl = inv_table._tbl
+tblPr = tbl.tblPr
+for old in tblPr.findall(qn('w:tblW')):
+    tblPr.remove(old)
+tblW = OxmlElement('w:tblW')
+tblW.set(qn('w:w'), str(int(3.15 * TW)))
+tblW.set(qn('w:type'), 'dxa')
+tblPr.append(tblW)
+for old in tblPr.findall(qn('w:tblLayout')):
+    tblPr.remove(old)
+tblLayout = OxmlElement('w:tblLayout')
+tblLayout.set(qn('w:type'), 'fixed')
+tblPr.append(tblLayout)
+NAME_W = Emu(int(2.35 * 914400))
+TYPE_W = Emu(int(0.80 * 914400))
+for col, w in zip(inv_table.columns, [NAME_W, TYPE_W]):
+    col.width = w
+for row in inv_table.rows:
+    for cell, w in zip(row.cells, [NAME_W, TYPE_W]):
+        cell.width = w
 
 d.save(DST)
 print('Saved', DST)

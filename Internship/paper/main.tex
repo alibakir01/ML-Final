@@ -17,6 +17,7 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{booktabs}
+\usepackage{longtable}
 \usepackage{url}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -345,7 +346,7 @@ exclusively from the six calendar and review histories spanning July--December
 2025 (``H2 2025''), jointly over 79 million listing-day rows. The target is
 built from a \emph{separate} set of six overlapping calendar snapshots
 (October~2025 through March~2026), described in
-Section~\ref{sec:targetconstruction}; critically, none of those 2026 snapshots
+Section~\ref{sec:eda}; critically, none of those 2026 snapshots
 ever contributes a training feature, only the target label. This dataset
 replaces the fixed, single-quarter 2016 Kaggle-competition snapshot used in our
 earlier study: it is larger (36{,}261 vs.\ roughly 24{,}000 properties, and 79
@@ -353,6 +354,26 @@ million vs.\ 8 million raw daily-history rows), it is continuously updated
 rather than static, and because it is open data rather than a closed
 competition export, the same pipeline can in principle be re-run against any
 later month to check whether the model still generalizes.
+
+\begin{table}[!t]
+\caption{Monthly Inside Airbnb snapshots used (New York City).}
+\label{tab:snapshots}
+\centering
+\begin{tabular}{lp{5cm}}
+\toprule
+Snapshot & Notes \\
+\midrule
+Jul--Nov 2025 & Calendar forward span $\sim$365 days; listings price $\sim$58--59\% populated; calendar price column present but 100\% empty \\
+Dec 2025--Feb 2026 & Calendar forward span $\sim$365--371 days; listings price 100\% empty; calendar price column present but 100\% empty \\
+Mar--Apr 2026 & Calendar forward span $\sim$365--366 days; listings price resumes ($\sim$59--60\% populated); calendar price column removed entirely \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ten consecutive monthly snapshots are available in total (July 2025 through
+April 2026); the pipeline described here uses the first nine (feature window
+Jul--Dec 2025, target window Oct 2025--Mar 2026), leaving April 2026 available
+on disk for a future deeper-history setup.
 
 %==============================================================================
 \section{Project Settings and Methodology}
@@ -404,33 +425,37 @@ $[0,90]$.}
 \end{figure}
 
 Table~\ref{tab:targetstats} quantifies the shape of the clean target on the
-full 36{,}261-listing universe. The mean (16.1) sits far above the median, the
+full 36{,}261-listing universe, alongside the naive single-snapshot count for
+comparison. The clean target's mean (16.1) sits far above its median (1), the
 distribution is strongly right-skewed (skewness $1.52$), and---most
 importantly---49.6\% of properties were blocked for zero nights in Q1 2026,
-while only 1.7\% reach the upper bound. This single statistic is what makes the
-task a \emph{zero-inflated, bounded} regression problem rather than an ordinary
-one, and it is the structural reason a least-squares estimator is biased at the
-extremes (Sections~\ref{sec:linearcritique} and~\ref{sec:residuals}).
-Table~\ref{tab:missing} lists the static columns with the highest missing
-rates; because these are far from missing-at-random (a missing
-\texttt{host\_response\_rate} typically marks an inactive host), we encode
-missingness explicitly with indicator columns rather than discarding it.
+while only 1.7\% reach the upper bound; the naive count, by contrast, is
+left-skewed (skewness $0.07$) with a median of 31 and only 32.5\% zeros, the
+signature of host-blocking noise rather than demand. This single statistic is
+what makes the clean target a \emph{zero-inflated, bounded} regression problem
+rather than an ordinary one, and it is the structural reason a least-squares
+estimator is biased at the extremes (Sections~\ref{sec:linearcritique}
+and~\ref{sec:residuals}). Table~\ref{tab:missing} lists the static columns with
+the highest missing rates; because these are far from missing-at-random (a
+missing \texttt{host\_response\_rate} typically marks an inactive host), we
+encode missingness explicitly with indicator columns rather than discarding it.
 
 \begin{table}[!t]
-\caption{Target statistics on the full listing universe ($n=36{,}261$), clean
-multi-snapshot rule.}
+\caption{Target statistics on the full listing universe ($n=36{,}261$): naive
+single-snapshot count vs.\ the clean multi-snapshot rule used throughout this
+paper (same listings, same target quarter).}
 \label{tab:targetstats}
 \centering
-\begin{tabular}{lc}
+\begin{tabular}{lcc}
 \toprule
-Statistic & Value \\
+Statistic & Naive & Clean \\
 \midrule
-Mean & 16.1 \\
-Median & 1 \\
-Standard deviation & 25.1 \\
-Skewness & 1.52 \\
-Rows with $y=0$ & 49.6\% \\
-Rows with $y=90$ & 1.7\% \\
+Mean & 44.2 & 16.1 \\
+Median & 31 & 1 \\
+Standard deviation & 41.1 & 25.1 \\
+Skewness & 0.07 & 1.52 \\
+Rows with $y=0$ & 32.5\% & 49.6\% \\
+Rows with $y=90$ & 39.2\% & 1.7\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -444,10 +469,14 @@ Rows with $y=90$ & 1.7\% \\
 Column & Missing rate \\
 \midrule
 \texttt{price} (raw) & 100\% \\
+\texttt{neighborhood\_overview} & 50.0\% \\
+\texttt{host\_about} & 42.7\% \\
 \texttt{host\_response\_rate/time} & 41.8\% \\
 \texttt{beds} & 41.1\% \\
 \texttt{bathrooms} & 40.8\% \\
+\texttt{host\_acceptance\_rate} & 40.7\% \\
 \texttt{review\_scores\_*} & 31.3\% \\
+\texttt{host\_location} & 21.7\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -600,11 +629,11 @@ complementary folds,
 \qquad i\in\mathcal{F}_k,
 \label{eq:kfoldte}
 \end{equation}
-where $e^{\,(-\mathcal{F}_k)}_{c}$ is \eqref{eq:smooth} evaluated on
+where $e^{\,(-\mathcal{F}_k)}_{c}$ is the smoothing formula above evaluated on
 $\{(\mathbf{x}_j,y_j):j\notin\mathcal{F}_k\}$. At transform time (validation and
 test rows) we use the full-data map.
 
-To make \eqref{eq:smooth} concrete, consider a neighbourhood that appears in
+To make the smoothing formula concrete, consider a neighbourhood that appears in
 $n_c=4$ training rows with a local mean of $\bar y_c=40$ blocked nights, against a
 global mean of $\mu=16.1$. With $\alpha=20$ the encoded value is
 $e_c=\frac{4\cdot 40+20\cdot 16.1}{4+20}=\frac{160+322}{24}\approx 20.1$, i.e.\
@@ -712,9 +741,9 @@ predictions to the count scale. This is not a contradiction with our decision to
 trees are invariant to monotone feature scaling and optimize the raw-scale loss
 directly, so for them the transform only distorted the objective, whereas for the
 MLP it is a numerical-stability aid. Batch normalization
-\eqref{eq:bn} keeps the pre-activations well scaled across the three hidden
-layers, and dropout ($p=0.2$) plus the $L_2$ weight decay in \eqref{eq:adam}
-regularize a network that would otherwise overfit a 29{,}008-row table with 206
+(defined above) keeps the pre-activations well scaled across the three hidden
+layers, and dropout ($p=0.2$) plus the $L_2$ weight decay in the Adam update
+above regularize a network that would otherwise overfit a 29{,}008-row table with 206
 inputs.
 
 \subsection{Hyper-Parameter Tuning}
@@ -797,7 +826,7 @@ $\{\mathcal{D}_k\}_{k=1}^{K}$, budget $N$, tree cap $B_{\max}$.
 Table~\ref{tab:search}.
 \item For each fold $k=1,\dots,K$: fit the preprocessing on the training part,
 carve an inner validation set $\mathcal{V}_k$, grow up to $B_{\max}$ trees, pick
-the early-stop iteration $b_k^{*}$ by \eqref{eq:earlystop}, and record
+the early-stop iteration $b_k^{*}$ by the early-stopping rule above, and record
 $m_k=\mathrm{MSE}$ on $\mathcal{D}_k$ using $b_k^{*}$ trees.
 \item Set $s=\frac{1}{K}\sum_k m_k$ and log $(\theta,s)$; if $s<s^{*}$, update
 $s^{*}\leftarrow s$, $\theta^{*}\leftarrow\theta$.
@@ -866,15 +895,15 @@ predictions staying on the valid scale:
 & 0 \le w_j \le 1,\quad j=1,\dots,m.
 \label{eq:blendbox}
 \end{align}
-The equality constraint~\eqref{eq:blendeq} and the box
-bounds~\eqref{eq:blendbox} make the solution a \emph{convex combination}, which
+The equality constraint above and the box
+bounds above make the solution a \emph{convex combination}, which
 keeps the blend on the same scale as the inputs and prevents any single model
-from receiving a runaway weight. We solve \eqref{eq:blendobj}--\eqref{eq:blendbox}
+from receiving a runaway weight. We solve this constrained problem
 with Sequential Least-Squares Quadratic Programming (SLSQP) via
 \texttt{scipy.optimize.minimize}, starting from the uniform point
 $w_j^{(0)}=1/m$ with \texttt{ftol}~$=10^{-9}$. As a post-processing step we zero
 out negligible weights ($w_j<10^{-4}$) and renormalize so that
-\eqref{eq:blendeq} still holds exactly. We also ran a randomized search directly
+the weights still sum to one exactly. We also ran a randomized search directly
 over the weight simplex as a sanity check and obtained the same optimum, which
 confirms the SLSQP solution is not an artefact of that particular optimizer.
 Across the nine candidate models, the optimizer concentrated most of the weight
@@ -912,7 +941,7 @@ but we also track MAE and $R^2$ internally because they are easier to read. To
 stop leakage, we (i) fit every preprocessing step only on the training fold,
 (ii) build no feature from any 2026 information (Section~\ref{sec:dataset}),
 and (iii) compute target encodings inside their own inner $K$-fold per
-\eqref{eq:kfoldte}. As a last step we clip predictions to $[0,90]$, both
+the target-encoding formula above. As a last step we clip predictions to $[0,90]$, both
 because no property can be blocked more than 90 nights in a 90-day quarter and
 to bound the loss contributed by any stray extrapolation.
 
@@ -1077,8 +1106,8 @@ opposite term---bagging averages many high-variance trees to cut variance---but,
 because every tree is grown to near-purity on the same features, it leaves a
 residual bias that boosting can still reduce. Gradient boosting lowers bias by
 fitting residuals stage by stage, and the tuned boosted-tree models add the
-regularization and early stopping \eqref{eq:xgbobj}--\eqref{eq:earlystop} that
-keep the corresponding variance in check, which is why they sit at the bottom
+regularization and early stopping (the regularized objective and early-stopping
+rule defined earlier) that keep the corresponding variance in check, which is why they sit at the bottom
 of the MSE column. The MLP is capable of low bias in principle, but on
 29{,}008 rows it is variance-limited without heavier regularization, which is
 exactly why batch normalization and dropout (Section~\ref{sec:mlp}) mattered so
@@ -1132,7 +1161,7 @@ weights.
 
 \begin{table}[!t]
 \caption{Optimal blend weights chosen by SLSQP on the OOF predictions of all
-nine models (problem~\eqref{eq:blendobj}--\eqref{eq:blendbox}).}
+nine models (the constrained blend problem in Section~\ref{sec:blend}).}
 \label{tab:weights}
 \centering
 \begin{tabular}{lc}
@@ -1156,7 +1185,7 @@ GradientBoosting & 0.0000 \\
 \label{sec:complementarity}
 A blend can only help if its members make \emph{different} mistakes; if every
 model erred on the same rows, averaging them would just reproduce the common
-error. Table~\ref{tab:errcorr} reports the Pearson correlation of the per-row
+error. The correlation table below reports the Pearson correlation of the per-row
 prediction errors across all nine models. All of the tree models are highly
 correlated with one another (most pairwise correlations above $0.95$), which is
 why the optimizer keeps only three of the six boosted-tree/forest variants at
@@ -1368,10 +1397,15 @@ train/validation leakage and no forward-looking (2026) information reaches the
 model as a feature; the held-out local test MSE (286.1) tracking the
 development CV MSE (290.1) closely is empirical support for this.
 \emph{External validity:} the model is fitted to a single market (New York
-City) and a single quarter (Q1 2026); the learned price and seasonality
-effects need not transfer to other cities or years, and the heavy reliance on
-H2-2025 calendar-volatility features means the model would degrade for
-brand-new listings with no six-month history. \emph{Construct validity:} the
+City); the learned price and seasonality effects need not transfer to other
+cities, and the heavy reliance on calendar-volatility features means the
+model would degrade for brand-new listings with no multi-month history.
+Temporal generalization within this market was checked directly
+(Section~\ref{sec:robustness}): we re-ran the same pipeline, with no
+per-setup re-tuning, on two additional history/target configurations (Q4
+2025 and Feb--Apr 2026), and held-out $R^2$ stayed in the same 0.54--0.62
+range as the primary Q1 2026 setup, so this result is not a one-quarter
+artefact. \emph{Construct validity:} the
 significance test in Section~\ref{sec:significance} is a paired test on the
 shared OOF predictions of the five-model blend rather than a full $5\times2$
 cross-validation \cite{dietterich1998}; it tests the right hypothesis but does
@@ -1401,7 +1435,7 @@ re-scraped every month, and we found that a large fraction of ``blocked'' dates
 in one scrape revert to available in a later one (host indecision, not a
 booking). We therefore built the target from six overlapping Q1-2026 snapshots
 and required at least two of them to agree before counting a date as
-genuinely booked (Section~\ref{sec:targetconstruction}), which was not a
+genuinely booked (Section~\ref{sec:eda}), which was not a
 possibility with the original single-snapshot data and materially changed the
 target's distribution (Section~\ref{sec:eda}).
 
@@ -1458,7 +1492,91 @@ ensembling, and blending, respectively --- a breakdown the original report did
 not include --- and we implemented, rather than merely proposed, the two-stage
 hurdle model motivated by the residual analysis (Section~\ref{sec:hurdle-impl}).
 
-%==============================================================================
+\subsection{Cross-Period Robustness}
+\label{sec:robustness}
+Everything reported so far uses a single history/target configuration --- we
+call it Setup B --- July--December 2025 history predicting Q1 2026. To check
+that this is not a one-quarter result, we re-ran the identical pipeline (the
+clean multi-snapshot target rule, the same five-model roster with
+hyperparameters reused unchanged from Setup B, and the same SLSQP blend) on
+two additional configurations: Setup A (July--September 2025 history
+predicting Q4 2025, the shallowest-history case) and Setup C (July
+2025--January 2026 history predicting February--April 2026, the
+deepest-history case). Table~\ref{tab:setups} summarises the three
+configurations, and Table~\ref{tab:targetstats3} their target distributions,
+each built from the identical clean multi-snapshot rule
+(Section~\ref{sec:eda}) applied to that setup's own snapshots.
+
+\begin{table}[!t]
+\caption{Prediction setups (history window $\to$ target quarter).}
+\label{tab:setups}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Setup & History & Target quarter & Listings \\
+\midrule
+A & Jul--Sep 2025 (3 mo) & Q4 2025 & 36{,}178 \\
+B (primary) & Jul--Dec 2025 (6 mo) & Q1 2026 & 36{,}261 \\
+C & Jul 2025--Jan 2026 (7 mo) & Feb--Apr 2026 & 36{,}282 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!t]
+\caption{Clean multi-snapshot target statistics by setup.}
+\label{tab:targetstats3}
+\centering
+\begin{tabular}{lccccc}
+\toprule
+Setup & $n$ & Mean & Median & Std & \% zero \\
+\midrule
+A & 36{,}178 & 21.5 & 2 & 29.5 & 47.7\% \\
+B & 36{,}261 & 16.1 & 1 & 25.1 & 49.6\% \\
+C & 36{,}282 & 17.9 & 1 & 26.4 & 48.6\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:robustness} reports the held-out test $R^2$ of the SLSQP blend
+for all three setups; Figure~\ref{fig:robustnessmodels} breaks this down by
+individual model. The blend's held-out $R^2$ is 0.622 (Setup A), 0.536 (Setup
+B), and 0.567 (Setup C): the accuracy is not a one-quarter artefact, and the
+same model ranking (blend $>$ CatBoost $\approx$ LightGBM $\approx$ XGBoost
+$>$ Random Forest $\gg$ Linear Regression) holds in every period.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig8_cross_period_robustness.png}
+\caption{Cross-period robustness: held-out test $R^2$ of the SLSQP blend for
+each of the three setups.}
+\label{fig:robustness}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{fig9_model_comparison_all_setups.png}
+\caption{Held-out test $R^2$ for every model, all three setups.}
+\label{fig:robustnessmodels}
+\end{figure}
+
+We also re-tested two further findings from Setup B on Setups A and C, with
+all hyperparameters reused unchanged (no per-setup re-tuning). First, the
+hurdle model (Section~\ref{sec:hurdle-impl}) did not improve on a single
+XGBoost model in either new setup (MSE $+4.15$ for Setup A, $+3.56$ for Setup
+C), matching Setup B's own borderline result. Second, we ran a direct
+naive-vs-clean-target comparison (fitting the identical model on both target
+definitions) for the first time on this project: it does \emph{not} show the
+clean target achieving a better $R^2$ or MSE than the naive target on either
+new setup --- the naive target's $R^2$ is mechanically inflated by its own
+higher variance ($R^2 = 1-\mathrm{MSE}/\mathrm{Var}(y)$; the naive target has
+$1.9$--$2.3\times$ the clean target's variance). We do not read this as
+evidence against the clean-target design: our justification for it was always
+a construct-validity argument (the clean rule isolates a real
+available$\to$booked transition, whereas the naive count conflates that with
+host-blocking, Section~\ref{sec:eda}), not a claim that it would score better
+by these metrics, and this result is a useful reminder to state that argument
+precisely rather than oversell it as an error-reduction technique.
+
 \section{Recommendations and Conclusions}
 \label{sec:concl}
 In this report we built a complete, leakage-safe machine-learning pipeline to
@@ -1504,16 +1622,17 @@ separate an accelerating listing from one that is merely busy on average.
 Light geographic smoothing, in which each listing's neighbourhood target
 encoding is blended with the encodings of adjacent K-Means clusters, could
 further stabilize the estimate for thinly populated neighbourhoods, in the same
-spirit as the additive smoothing already in \eqref{eq:smooth}. Third, with a
+spirit as the additive smoothing formula already used for target encoding. Third, with a
 larger compute budget we would tune the MLP more carefully; the
-error-correlation analysis (Table~\ref{tab:errcorr}) showed it is the least
+error-correlation analysis earlier (Section~\ref{sec:complementarity}) showed it is the least
 correlated model with the tree ensembles, so a stronger MLP is a promising way
-to raise the weight the blend is willing to give it. Finally, and unlike the
-original fixed-snapshot study, this pipeline can be re-run against later Inside
-Airbnb scrapes as they are published: validating it against a subsequent
-quarter (e.g.\ predicting Q2 2026 once that window closes) would be a direct,
-non-simulated test of the external-validity concerns raised in
-Section~\ref{sec:threats}.
+to raise the weight the blend is willing to give it. Finally, the cross-period
+check (Section~\ref{sec:robustness}) used quarters already present in the ten
+available snapshots; unlike the original fixed-snapshot study, this pipeline
+can also be re-run against later Inside Airbnb scrapes as they are published,
+so validating it against a genuinely new quarter (e.g.\ predicting Q3 2026
+once that window closes) would be a stronger, non-backtested test of the same
+external-validity concerns raised in Section~\ref{sec:threats}.
 
 Stepping back, the project reinforced the same lesson as its predecessor, now
 under a harder, self-imposed constraint: on a well-specified tabular
@@ -1550,88 +1669,232 @@ with the original 2016-data feature set but are 100\% missing in this Inside
 Airbnb export (Section~\ref{sec:eda}) and are median-imputed to a constant like
 any other missing column.
 
-\begin{table*}[!ht]
+\begin{longtable}{p{2.2in}p{0.8in}}
 \caption{Detailed list of all 208 columns in the processed feature matrix
 (identifier, target, and 206 features).}
-\label{tab:allfeatures_list}
-\centering
-\footnotesize
-\begin{tabular}{ll|ll|ll}
+\label{tab:allfeatures_list} \\
 \toprule
-Feature Name & Type & Feature Name & Type & Feature Name & Type \\
+Feature Name & Type \\
 \midrule
-\texttt{id} & integer (ID) & \texttt{blocked\_days\_Q1\_2026} & integer (target) & \texttt{q3\_days\_total} & float \\
-\texttt{q3\_days\_blocked} & float & \texttt{q3\_days\_avail} & float & \texttt{q3\_blocking\_rate} & float \\
-\texttt{q3\_avail\_rate} & float & \texttt{q3\_we\_blocking\_rate} & float & \texttt{q3\_we\_days} & float \\
-\texttt{q3\_wd\_blocking\_rate} & float & \texttt{q3\_wd\_days} & float & \texttt{q3\_new\_blockings} & float \\
-\texttt{q3\_new\_unblockings} & float & \texttt{q3\_we\_minus\_wd\_blocking} & float & \texttt{q4\_days\_total} & integer \\
-\texttt{q4\_days\_blocked} & integer & \texttt{q4\_days\_avail} & integer & \texttt{q4\_blocking\_rate} & float \\
-\texttt{q4\_avail\_rate} & float & \texttt{q4\_we\_blocking\_rate} & float & \texttt{q4\_we\_days} & integer \\
-\texttt{q4\_wd\_blocking\_rate} & float & \texttt{q4\_wd\_days} & integer & \texttt{q4\_new\_blockings} & integer \\
-\texttt{q4\_new\_unblockings} & integer & \texttt{q4\_we\_minus\_wd\_blocking} & float & \texttt{h2\_days\_total} & integer \\
-\texttt{h2\_days\_blocked} & integer & \texttt{h2\_days\_avail} & integer & \texttt{h2\_blocking\_rate} & float \\
-\texttt{h2\_avail\_rate} & float & \texttt{h2\_we\_blocking\_rate} & float & \texttt{h2\_we\_days} & integer \\
-\texttt{h2\_wd\_blocking\_rate} & float & \texttt{h2\_wd\_days} & integer & \texttt{h2\_new\_blockings} & integer \\
-\texttt{h2\_new\_unblockings} & integer & \texttt{h2\_we\_minus\_wd\_blocking} & float & \texttt{m7\_blocking\_rate} & float \\
-\texttt{m7\_days} & float & \texttt{m8\_blocking\_rate} & float & \texttt{m8\_days} & float \\
-\texttt{m9\_blocking\_rate} & float & \texttt{m9\_days} & float & \texttt{m10\_blocking\_rate} & float \\
-\texttt{m10\_days} & float & \texttt{m11\_blocking\_rate} & float & \texttt{m11\_days} & float \\
-\texttt{m12\_blocking\_rate} & float & \texttt{m12\_days} & float & \texttt{recent\_days\_total} & integer \\
-\texttt{recent\_days\_blocked} & integer & \texttt{recent\_days\_avail} & integer & \texttt{recent\_blocking\_rate} & float \\
-\texttt{recent\_avail\_rate} & float & \texttt{recent\_we\_blocking\_rate} & float & \texttt{recent\_we\_days} & integer \\
-\texttt{recent\_wd\_blocking\_rate} & float & \texttt{recent\_wd\_days} & integer & \texttt{recent\_new\_blockings} & integer \\
-\texttt{recent\_new\_unblockings} & integer & \texttt{recent\_we\_minus\_wd\_blocking} & float & \texttt{h2\_flips} & integer \\
-\texttt{h2\_multi\_obs\_days} & integer & \texttt{h2\_flip\_rate} & float & \texttt{hosts\_time\_as\_user\_years} & float \\
-\texttt{hosts\_time\_as\_user\_months} & float & \texttt{hosts\_time\_as\_host\_years} & float & \texttt{hosts\_time\_as\_host\_months} & float \\
-\texttt{host\_listings\_count} & float & \texttt{host\_total\_listings\_count} & float & \texttt{neighbourhood\_cleansed} & str (raw cat.) \\
-\texttt{latitude} & float & \texttt{longitude} & float & \texttt{accommodates} & float \\
-\texttt{bedrooms} & float & \texttt{beds} & float & \texttt{minimum\_nights} & float \\
-\texttt{maximum\_nights} & float & \texttt{minimum\_minimum\_nights} & float & \texttt{maximum\_minimum\_nights} & float \\
-\texttt{minimum\_maximum\_nights} & float & \texttt{maximum\_maximum\_nights} & float & \texttt{minimum\_nights\_avg\_ntm} & float \\
-\texttt{maximum\_nights\_avg\_ntm} & float & \texttt{number\_of\_reviews} & float & \texttt{number\_of\_reviews\_ltm} & float \\
-\texttt{number\_of\_reviews\_l30d} & float & \texttt{number\_of\_reviews\_ly} & float & \texttt{estimated\_occupancy\_l365d} & float \\
-\texttt{estimated\_revenue\_l365d} & float (all-missing) & \texttt{review\_scores\_rating} & float & \texttt{review\_scores\_accuracy} & float \\
-\texttt{review\_scores\_cleanliness} & float & \texttt{review\_scores\_checkin} & float & \texttt{review\_scores\_communication} & float \\
-\texttt{review\_scores\_location} & float & \texttt{review\_scores\_value} & float & \texttt{calculated\_host\_listings\_count} & float \\
-\texttt{calculated\_host\_listings\_count\_entire\_homes} & integer & \texttt{calculated\_host\_listings\_count\_private\_rooms} & integer & \texttt{calculated\_host\_listings\_count\_shared\_rooms} & integer \\
-\texttt{reviews\_per\_month} & float & \texttt{p5\_mean} & float & \texttt{p5\_std} & float \\
-\texttt{p5\_cv} & float & \texttt{p5\_trend} & float & \texttt{p5\_min} & float \\
-\texttt{p5\_max} & float & \texttt{p5\_range} & float & \texttt{p5\_n\_distinct} & float \\
-\texttt{price\_implied} & float (all-missing) & \texttt{price\_numeric} & float & \texttt{price\_missing} & binary \\
-\texttt{price\_rel\_nbhd} & float & \texttt{host\_response\_rate\_num} & float & \texttt{host\_acceptance\_rate\_num} & float \\
-\texttt{host\_is\_superhost\_enc} & binary & \texttt{instant\_bookable\_enc} & binary & \texttt{host\_identity\_verified\_enc} & binary \\
-\texttt{host\_has\_profile\_pic\_enc} & binary & \texttt{host\_response\_time\_enc} & float & \texttt{host\_response\_time\_missing} & binary \\
-\texttt{host\_age\_days} & float & \texttt{listing\_age\_days} & float & \texttt{days\_since\_last\_review} & float \\
-\texttt{has\_reviews} & binary & \texttt{price\_per\_guest} & float & \texttt{min\_stay\_x\_price} & float \\
-\texttt{implied\_nightly\_rate} & float (all-missing) & \texttt{bathrooms\_num} & float & \texttt{bath\_is\_shared} & binary \\
-\texttt{amen\_wifi} & binary & \texttt{amen\_kitchen} & binary & \texttt{amen\_ac} & binary \\
-\texttt{amen\_washer} & binary & \texttt{amen\_dryer} & binary & \texttt{amen\_parking} & binary \\
-\texttt{amen\_elevator} & binary & \texttt{amen\_tv} & binary & \texttt{amen\_pool} & binary \\
-\texttt{amen\_gym} & binary & \texttt{amen\_co\_alarm} & binary & \texttt{amen\_long\_term} & binary \\
-\texttt{amen\_self\_checkin} & binary & \texttt{amen\_hot\_tub} & binary & \texttt{kw\_luxury} & binary \\
-\texttt{kw\_private} & binary & \texttt{kw\_cozy} & binary & \texttt{kw\_modern} & binary \\
-\texttt{kw\_view} & binary & \texttt{kw\_near} & binary & \texttt{kw\_spacious} & binary \\
-\texttt{kw\_studio} & binary & \texttt{title\_len} & integer & \texttt{title\_words} & integer \\
-\texttt{property\_type\_grp\_Hotel\_Hostel} & binary & \texttt{property\_type\_grp\_Other} & binary & \texttt{property\_type\_grp\_Private\_Room} & binary \\
-\texttt{property\_type\_grp\_Shared\_Room} & binary & \texttt{room\_type\_Hotel room} & binary & \texttt{room\_type\_Private room} & binary \\
-\texttt{room\_type\_Shared room} & binary & \texttt{neighbourhood\_group\_cleansed\_Brooklyn} & binary & \texttt{neighbourhood\_group\_cleansed\_Manhattan} & binary \\
-\texttt{neighbourhood\_group\_cleansed\_Queens} & binary & \texttt{neighbourhood\_group\_cleansed\_Staten Island} & binary & \texttt{neighbourhood\_freq} & float \\
-\texttt{geo\_cluster\_1} & binary & \texttt{geo\_cluster\_2} & binary & \texttt{geo\_cluster\_3} & binary \\
-\texttt{geo\_cluster\_4} & binary & \texttt{geo\_cluster\_5} & binary & \texttt{geo\_cluster\_6} & binary \\
-\texttt{geo\_cluster\_7} & binary & \texttt{geo\_cluster\_8} & binary & \texttt{geo\_cluster\_9} & binary \\
-\texttt{geo\_cluster\_10} & binary & \texttt{geo\_cluster\_11} & binary & \texttt{geo\_cluster\_12} & binary \\
-\texttt{geo\_cluster\_13} & binary & \texttt{geo\_cluster\_14} & binary & \texttt{geo\_cluster\_15} & binary \\
-\texttt{geo\_cluster\_16} & binary & \texttt{geo\_cluster\_17} & binary & \texttt{geo\_cluster\_18} & binary \\
-\texttt{geo\_cluster\_19} & binary & \texttt{rev\_30d} & integer & \texttt{rev\_90d} & integer \\
-\texttt{rev\_180d} & integer & \texttt{rev\_365d} & integer & \texttt{rev\_accel\_90} & integer \\
-\texttt{q3\_to\_q4\_blocking\_trend} & float & \texttt{q3\_to\_q4\_blocking\_ratio} & float & \texttt{recent\_fully\_blocked} & binary \\
-\texttt{traj\_slope} & float & \texttt{traj\_recent3} & float & \texttt{traj\_older3} & float \\
-\texttt{traj\_recent\_older\_ratio} & float & \texttt{traj\_accel} & float & \texttt{traj\_std} & float \\
-\texttt{traj\_nonzero\_months} & integer & \texttt{nb\_mean\_rate} & float & \texttt{nb\_density} & integer \\
-\texttt{rate\_vs\_nb} & float & \texttt{geo\_mean\_rate} & float & \texttt{geo\_density} & integer \\
-\texttt{rate\_vs\_geo} & float &  &  &  &  \\
+\endfirsthead
+\multicolumn{2}{c}{\tablename\ \thetable{} -- continued from previous page} \\
+\toprule
+Feature Name & Type \\
+\midrule
+\endhead
+\midrule
+\multicolumn{2}{r}{\textit{Continued on next page}} \\
+\endfoot
 \bottomrule
-\end{tabular}
-\end{table*}
+\endlastfoot
+\texttt{id} & integer (ID) \\
+\texttt{blocked\_days\_Q1\_2026} & integer (target) \\
+\texttt{q3\_days\_total} & float \\
+\texttt{q3\_days\_blocked} & float \\
+\texttt{q3\_days\_avail} & float \\
+\texttt{q3\_blocking\_rate} & float \\
+\texttt{q3\_avail\_rate} & float \\
+\texttt{q3\_we\_blocking\_rate} & float \\
+\texttt{q3\_we\_days} & float \\
+\texttt{q3\_wd\_blocking\_rate} & float \\
+\texttt{q3\_wd\_days} & float \\
+\texttt{q3\_new\_blockings} & float \\
+\texttt{q3\_new\_unblockings} & float \\
+\texttt{q3\_we\_minus\_wd\_blocking} & float \\
+\texttt{q4\_days\_total} & integer \\
+\texttt{q4\_days\_blocked} & integer \\
+\texttt{q4\_days\_avail} & integer \\
+\texttt{q4\_blocking\_rate} & float \\
+\texttt{q4\_avail\_rate} & float \\
+\texttt{q4\_we\_blocking\_rate} & float \\
+\texttt{q4\_we\_days} & integer \\
+\texttt{q4\_wd\_blocking\_rate} & float \\
+\texttt{q4\_wd\_days} & integer \\
+\texttt{q4\_new\_blockings} & integer \\
+\texttt{q4\_new\_unblockings} & integer \\
+\texttt{q4\_we\_minus\_wd\_blocking} & float \\
+\texttt{h2\_days\_total} & integer \\
+\texttt{h2\_days\_blocked} & integer \\
+\texttt{h2\_days\_avail} & integer \\
+\texttt{h2\_blocking\_rate} & float \\
+\texttt{h2\_avail\_rate} & float \\
+\texttt{h2\_we\_blocking\_rate} & float \\
+\texttt{h2\_we\_days} & integer \\
+\texttt{h2\_wd\_blocking\_rate} & float \\
+\texttt{h2\_wd\_days} & integer \\
+\texttt{h2\_new\_blockings} & integer \\
+\texttt{h2\_new\_unblockings} & integer \\
+\texttt{h2\_we\_minus\_wd\_blocking} & float \\
+\texttt{m7\_blocking\_rate} & float \\
+\texttt{m7\_days} & float \\
+\texttt{m8\_blocking\_rate} & float \\
+\texttt{m8\_days} & float \\
+\texttt{m9\_blocking\_rate} & float \\
+\texttt{m9\_days} & float \\
+\texttt{m10\_blocking\_rate} & float \\
+\texttt{m10\_days} & float \\
+\texttt{m11\_blocking\_rate} & float \\
+\texttt{m11\_days} & float \\
+\texttt{m12\_blocking\_rate} & float \\
+\texttt{m12\_days} & float \\
+\texttt{recent\_days\_total} & integer \\
+\texttt{recent\_days\_blocked} & integer \\
+\texttt{recent\_days\_avail} & integer \\
+\texttt{recent\_blocking\_rate} & float \\
+\texttt{recent\_avail\_rate} & float \\
+\texttt{recent\_we\_blocking\_rate} & float \\
+\texttt{recent\_we\_days} & integer \\
+\texttt{recent\_wd\_blocking\_rate} & float \\
+\texttt{recent\_wd\_days} & integer \\
+\texttt{recent\_new\_blockings} & integer \\
+\texttt{recent\_new\_unblockings} & integer \\
+\texttt{recent\_we\_minus\_wd\_blocking} & float \\
+\texttt{h2\_flips} & integer \\
+\texttt{h2\_multi\_obs\_days} & integer \\
+\texttt{h2\_flip\_rate} & float \\
+\texttt{hosts\_time\_as\_user\_years} & float \\
+\texttt{hosts\_time\_as\_user\_months} & float \\
+\texttt{hosts\_time\_as\_host\_years} & float \\
+\texttt{hosts\_time\_as\_host\_months} & float \\
+\texttt{host\_listings\_count} & float \\
+\texttt{host\_total\_listings\_count} & float \\
+\texttt{neighbourhood\_cleansed} & str (raw cat.) \\
+\texttt{latitude} & float \\
+\texttt{longitude} & float \\
+\texttt{accommodates} & float \\
+\texttt{bedrooms} & float \\
+\texttt{beds} & float \\
+\texttt{minimum\_nights} & float \\
+\texttt{maximum\_nights} & float \\
+\texttt{minimum\_minimum\_nights} & float \\
+\texttt{maximum\_minimum\_nights} & float \\
+\texttt{minimum\_maximum\_nights} & float \\
+\texttt{maximum\_maximum\_nights} & float \\
+\texttt{minimum\_nights\_avg\_ntm} & float \\
+\texttt{maximum\_nights\_avg\_ntm} & float \\
+\texttt{number\_of\_reviews} & float \\
+\texttt{number\_of\_reviews\_ltm} & float \\
+\texttt{number\_of\_reviews\_l30d} & float \\
+\texttt{number\_of\_reviews\_ly} & float \\
+\texttt{estimated\_occupancy\_l365d} & float \\
+\texttt{estimated\_revenue\_l365d} & float (all-missing) \\
+\texttt{review\_scores\_rating} & float \\
+\texttt{review\_scores\_accuracy} & float \\
+\texttt{review\_scores\_cleanliness} & float \\
+\texttt{review\_scores\_checkin} & float \\
+\texttt{review\_scores\_communication} & float \\
+\texttt{review\_scores\_location} & float \\
+\texttt{review\_scores\_value} & float \\
+\texttt{calculated\_host\_listings\_count} & float \\
+\texttt{calculated\_host\_listings\_count\_entire\_homes} & integer \\
+\texttt{calculated\_host\_listings\_count\_private\_rooms} & integer \\
+\texttt{calculated\_host\_listings\_count\_shared\_rooms} & integer \\
+\texttt{reviews\_per\_month} & float \\
+\texttt{p5\_mean} & float \\
+\texttt{p5\_std} & float \\
+\texttt{p5\_cv} & float \\
+\texttt{p5\_trend} & float \\
+\texttt{p5\_min} & float \\
+\texttt{p5\_max} & float \\
+\texttt{p5\_range} & float \\
+\texttt{p5\_n\_distinct} & float \\
+\texttt{price\_implied} & float (all-missing) \\
+\texttt{price\_numeric} & float \\
+\texttt{price\_missing} & binary \\
+\texttt{price\_rel\_nbhd} & float \\
+\texttt{host\_response\_rate\_num} & float \\
+\texttt{host\_acceptance\_rate\_num} & float \\
+\texttt{host\_is\_superhost\_enc} & binary \\
+\texttt{instant\_bookable\_enc} & binary \\
+\texttt{host\_identity\_verified\_enc} & binary \\
+\texttt{host\_has\_profile\_pic\_enc} & binary \\
+\texttt{host\_response\_time\_enc} & float \\
+\texttt{host\_response\_time\_missing} & binary \\
+\texttt{host\_age\_days} & float \\
+\texttt{listing\_age\_days} & float \\
+\texttt{days\_since\_last\_review} & float \\
+\texttt{has\_reviews} & binary \\
+\texttt{price\_per\_guest} & float \\
+\texttt{min\_stay\_x\_price} & float \\
+\texttt{implied\_nightly\_rate} & float (all-missing) \\
+\texttt{bathrooms\_num} & float \\
+\texttt{bath\_is\_shared} & binary \\
+\texttt{amen\_wifi} & binary \\
+\texttt{amen\_kitchen} & binary \\
+\texttt{amen\_ac} & binary \\
+\texttt{amen\_washer} & binary \\
+\texttt{amen\_dryer} & binary \\
+\texttt{amen\_parking} & binary \\
+\texttt{amen\_elevator} & binary \\
+\texttt{amen\_tv} & binary \\
+\texttt{amen\_pool} & binary \\
+\texttt{amen\_gym} & binary \\
+\texttt{amen\_co\_alarm} & binary \\
+\texttt{amen\_long\_term} & binary \\
+\texttt{amen\_self\_checkin} & binary \\
+\texttt{amen\_hot\_tub} & binary \\
+\texttt{kw\_luxury} & binary \\
+\texttt{kw\_private} & binary \\
+\texttt{kw\_cozy} & binary \\
+\texttt{kw\_modern} & binary \\
+\texttt{kw\_view} & binary \\
+\texttt{kw\_near} & binary \\
+\texttt{kw\_spacious} & binary \\
+\texttt{kw\_studio} & binary \\
+\texttt{title\_len} & integer \\
+\texttt{title\_words} & integer \\
+\texttt{property\_type\_grp\_Hotel\_Hostel} & binary \\
+\texttt{property\_type\_grp\_Other} & binary \\
+\texttt{property\_type\_grp\_Private\_Room} & binary \\
+\texttt{property\_type\_grp\_Shared\_Room} & binary \\
+\texttt{room\_type\_Hotel room} & binary \\
+\texttt{room\_type\_Private room} & binary \\
+\texttt{room\_type\_Shared room} & binary \\
+\texttt{neighbourhood\_group\_cleansed\_Brooklyn} & binary \\
+\texttt{neighbourhood\_group\_cleansed\_Manhattan} & binary \\
+\texttt{neighbourhood\_group\_cleansed\_Queens} & binary \\
+\texttt{neighbourhood\_group\_cleansed\_Staten Island} & binary \\
+\texttt{neighbourhood\_freq} & float \\
+\texttt{geo\_cluster\_1} & binary \\
+\texttt{geo\_cluster\_2} & binary \\
+\texttt{geo\_cluster\_3} & binary \\
+\texttt{geo\_cluster\_4} & binary \\
+\texttt{geo\_cluster\_5} & binary \\
+\texttt{geo\_cluster\_6} & binary \\
+\texttt{geo\_cluster\_7} & binary \\
+\texttt{geo\_cluster\_8} & binary \\
+\texttt{geo\_cluster\_9} & binary \\
+\texttt{geo\_cluster\_10} & binary \\
+\texttt{geo\_cluster\_11} & binary \\
+\texttt{geo\_cluster\_12} & binary \\
+\texttt{geo\_cluster\_13} & binary \\
+\texttt{geo\_cluster\_14} & binary \\
+\texttt{geo\_cluster\_15} & binary \\
+\texttt{geo\_cluster\_16} & binary \\
+\texttt{geo\_cluster\_17} & binary \\
+\texttt{geo\_cluster\_18} & binary \\
+\texttt{geo\_cluster\_19} & binary \\
+\texttt{rev\_30d} & integer \\
+\texttt{rev\_90d} & integer \\
+\texttt{rev\_180d} & integer \\
+\texttt{rev\_365d} & integer \\
+\texttt{rev\_accel\_90} & integer \\
+\texttt{q3\_to\_q4\_blocking\_trend} & float \\
+\texttt{q3\_to\_q4\_blocking\_ratio} & float \\
+\texttt{recent\_fully\_blocked} & binary \\
+\texttt{traj\_slope} & float \\
+\texttt{traj\_recent3} & float \\
+\texttt{traj\_older3} & float \\
+\texttt{traj\_recent\_older\_ratio} & float \\
+\texttt{traj\_accel} & float \\
+\texttt{traj\_std} & float \\
+\texttt{traj\_nonzero\_months} & integer \\
+\texttt{nb\_mean\_rate} & float \\
+\texttt{nb\_density} & integer \\
+\texttt{rate\_vs\_nb} & float \\
+\texttt{geo\_mean\_rate} & float \\
+\texttt{geo\_density} & integer \\
+\texttt{rate\_vs\_geo} & float \\
+\end{longtable}
 
 \end{document}
