@@ -42,11 +42,12 @@ unavailable across consecutive snapshots, and stays unavailable, is counted as
 booked. The resulting target is a censored, zero-inflated integer in $[0,92]$ with
 roughly half its mass at zero. A single leakage-safe pipeline---median imputation,
 one-hot encoding, and a $K$-fold target encoder for high-cardinality location
-fields---feeds five learners (Linear Regression, Random Forest, XGBoost, LightGBM,
-CatBoost) that are combined by a convex weighted blend whose weights are found by
+fields---feeds six learners (Linear Regression, Random Forest, XGBoost, LightGBM,
+CatBoost, and a PyTorch multi-layer perceptron trained with Adam) that are combined
+by a convex weighted blend whose weights are found by
 Sequential Least-Squares Quadratic Programming (SLSQP). Using a seven-month
 behavioural history to predict the February--April 2026 quarter, the blend attains
-a $20\%$ held-out test $R^2$ of $0.653$, within $0.010$ of its cross-validation
+a $20\%$ held-out test $R^2$ of $0.654$, within $0.011$ of its cross-validation
 estimate, and the improvement over the best single learner is statistically
 significant. The method is validated across three independent target quarters,
 and a controlled ablation shows that the dominant lever is the target definition
@@ -138,9 +139,9 @@ target from Boolean availability calendars, and shows empirically that it yields
 zero-inflated, bounded booking signal, whereas the naive occupancy proxy is
 dominated by host blocking and is therefore unsuitable.
 \item It presents a single leakage-safe pipeline---median imputation, one-hot and
-$K$-fold target encoding, five heterogeneous learners, and an SLSQP convex
+$K$-fold target encoding, six heterogeneous learners, and an SLSQP convex
 blend---and evaluates it with both cross-validation and a disjoint held-out test
-set, reaching a held-out $R^2$ of $0.653$.
+set, reaching a held-out $R^2$ of $0.654$.
 \item It validates the method across three independent target quarters, providing
 evidence of temporal robustness.
 \item It reports a controlled ablation that isolates the contribution of every
@@ -672,10 +673,27 @@ cleaner than the raw occupancy count, and it is the single most consequential
 modelling decision in the study.
 
 \subsection{Base learners}
-Five heterogeneous learners span the linear, bagging, and boosting families:
-Linear Regression (a scaled interpretable baseline), Random Forest \cite{breiman2001},
-XGBoost \cite{chen2016xgboost}, LightGBM \cite{ke2017lightgbm}, and CatBoost
-\cite{prokhorenkova2018catboost}. All are trained on the same preprocessed matrix
+Six heterogeneous learners span the linear, bagging, boosting, and neural-network
+families: Linear Regression (a scaled interpretable baseline), Random Forest
+\cite{breiman2001}, XGBoost \cite{chen2016xgboost}, LightGBM \cite{ke2017lightgbm},
+CatBoost \cite{prokhorenkova2018catboost}, and a PyTorch \cite{paszke2019pytorch}
+multi-layer perceptron trained with the Adam optimiser \cite{kingma2015adam}. The
+MLP has three hidden layers ($256\!\to\!128\!\to\!64$) with batch normalisation,
+ReLU, and dropout, and is trained directly on the raw (untransformed) target; a
+$\log(1+y)$ transform, effective on the Kaggle-era formulation of this problem,
+degraded its accuracy here. Adam updates each parameter using the standard moment
+estimates $m_t=\beta_1 m_{t-1}+(1-\beta_1)g_t$ and
+$v_t=\beta_2 v_{t-1}+(1-\beta_2)g_t^2$ of the gradient $g_t$. XGBoost's regularised
+learning objective makes its complexity penalty explicit:
+\begin{equation}
+\mathcal{L}(\phi) = \sum_{i=1}^{n}\ell(y_i,\hat y_i) + \sum_{k=1}^{K}\Omega(f_k),
+\label{eq:xgb-obj}
+\end{equation}
+where $K$ is the number of trees in the ensemble and
+$\Omega(f_k)=\gamma T_k+\tfrac12\lambda\lVert w_k\rVert^2$ penalises each tree's
+leaf count $T_k$ and leaf-weight norm, discouraging overly complex trees; $\lambda$
+is tuned (Section~\ref{sec:hpsearch}) and fixed at $\lambda=3$ for the default model.
+All are trained on the same preprocessed matrix
 with squared-error loss; the tree models exploit the encoded categorical splits,
 while the linear baseline additionally uses feature scaling. Predictions are
 clipped to $[0,92]$, both because the competition-style metric is defined on that
@@ -688,7 +706,7 @@ random seed governs every model so that the comparison among them, and the estim
 blend weights, are exactly reproducible.
 
 \subsection{Convex weighted blend}
-Rather than selecting a single learner, the out-of-fold predictions of the $m=5$
+Rather than selecting a single learner, the out-of-fold predictions of the $m=6$
 learners are stacked into a matrix $\mathbf P\in\mathbb R^{n\times m}$ and combined
 by a convex weighted average. The weights minimise the blended MSE subject to a
 probability-simplex constraint:
@@ -732,6 +750,7 @@ retained for comparison. The empirical outcome---that neither variant improves o
 the direct blend---is reported and discussed in Section~\ref{sec:ablation}.
 
 \subsection{Hyper-parameter search}
+\label{sec:hpsearch}
 The two boosted-tree learners most likely to benefit from tuning, XGBoost and
 LightGBM, were tuned by a randomized search of $30$ configurations per family
 under the same $5$-fold cross-validation, sampling the learning rate and
@@ -750,7 +769,7 @@ The pipeline is inexpensive. Building the feature matrix from the multi-million-
 calendars is a one-time aggregation that dominates wall-clock time but is trivially
 parallel over listings. Each learner fits in seconds to a few minutes on a
 $36{,}000$-row matrix on a single multi-core CPU; the SLSQP blend optimises only
-$m=5$ weights over a cached matrix of out-of-fold predictions and converges in well
+$m=6$ weights over a cached matrix of out-of-fold predictions and converges in well
 under a second. Because the out-of-fold predictions are cached, the blend and every
 post-hoc diagnostic can be recomputed without retraining, which makes the entire
 ablation study cheap to run.
@@ -759,13 +778,15 @@ ablation study cheap to run.
 All results use a single fixed seed governing the development/test split, the
 cross-validation partitions, and the inner target-encoding folds. The
 implementation is in Python with scikit-learn (preprocessing, linear and
-random-forest models, cross-validation), XGBoost, LightGBM, CatBoost, and
+random-forest models, cross-validation), XGBoost, LightGBM, CatBoost, PyTorch
+(the MLP sixth learner), and
 \texttt{scipy.optimize} for the SLSQP blend. Out-of-fold predictions are cached so
 that the blend and all diagnostics can be recomputed without retraining. The
 software stack comprises Python~3.13 with scikit-learn (preprocessing, the linear
 and random-forest models, and cross-validation), XGBoost, LightGBM, and CatBoost
-for the boosted learners, and \texttt{scipy.optimize} for the SLSQP blend; all
-experiments run on a single multi-core CPU with no GPU. The code is organised as a
+for the boosted learners, PyTorch~2.12 for the MLP, and \texttt{scipy.optimize} for
+the SLSQP blend; all experiments run on a MacBook Air (Apple M4, 10-core CPU, 16GB
+RAM, 512GB SSD) with no discrete GPU. The code is organised as a
 sequence of stages---exploratory analysis, feature construction, one module per
 model family, the blend, and the diagnostics---each of which reads and writes
 intermediate artefacts to disk, so that any stage can be re-executed independently
@@ -779,10 +800,10 @@ and the full study reproduced end to end from the raw snapshots and a single see
 Table~\ref{tab:heldout} reports the primary result: the performance of every
 learner and of the blend on the $20\%$ held-out test set, alongside the
 development cross-validation estimate, for Setup~C. The blend is the best
-configuration on both partitions, reaching a held-out test $R^2$ of $0.653$
-(MSE $262.0$). Figure~\ref{fig:modelcmp} visualises the held-out ranking.
-Critically, the held-out $R^2$ ($0.653$) is within $0.010$ of the development
-cross-validation estimate ($0.663$): the model does not overfit, and the
+configuration on both partitions, reaching a held-out test $R^2$ of $0.654$
+(MSE $260.9$). Figure~\ref{fig:modelcmp} visualises the held-out ranking.
+Critically, the held-out $R^2$ ($0.654$) is within $0.011$ of the development
+cross-validation estimate ($0.665$): the model does not overfit, and the
 cross-validation figures reported elsewhere in the paper are honest rather than
 optimistic. It is worth translating this accuracy into operational terms. An $R^2$
 of about $0.65$ on a target with a standard deviation near $28$ nights corresponds
@@ -807,11 +828,12 @@ negligible dev--test gap.}
 Model & Dev $R^2$ & Test $R^2$ & Test MSE \\
 \midrule
 Linear Regression & 0.581 & 0.568 & 326.0 \\
+MLP & 0.632 & 0.626 & 282.4 \\
 CatBoost & 0.654 & 0.641 & 270.8 \\
 Random Forest & 0.652 & 0.644 & 268.7 \\
-XGBoost & 0.659 & 0.647 & 266.2 \\
+XGBoost & 0.661 & 0.647 & 266.2 \\
 LightGBM & 0.659 & 0.649 & 264.6 \\
-\textbf{SLSQP blend} & \textbf{0.663} & \textbf{0.653} & \textbf{262.0} \\
+\textbf{SLSQP blend} & \textbf{0.665} & \textbf{0.654} & \textbf{260.9} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -830,8 +852,8 @@ Setup~C. The three gradient-boosting learners are close (LightGBM and XGBoost
 lead among singles at $R^2=0.659$), Random Forest is competitive, and the linear
 baseline trails, as expected on a non-linear, interaction-rich target. The blend
 improves on every single learner in MSE, MAE, and $R^2$ simultaneously. The convex
-weights concentrate on the complementary learners---Random Forest $0.39$, LightGBM
-$0.36$, XGBoost $0.23$, CatBoost $0.02$, Linear $0.00$---rather than placing all
+weights concentrate on the complementary learners---Random Forest $0.37$, LightGBM
+$0.34$, XGBoost $0.12$, the MLP $0.17$, CatBoost $0.00$, Linear $0.00$---rather than placing all
 weight on the single best model, which is precisely why the blend improves: its
 members make partially different errors, and the constrained optimisation exploits
 that de-correlation. A naive equal-weight average, by contrast, is worse than the
@@ -847,11 +869,12 @@ convex weighting is what converts the ensemble into a net gain.
 Model & MSE & MAE & $R^2$ \\
 \midrule
 Linear Regression & 322.7 & 11.88 & 0.578 \\
+MLP & 279.0 & 10.11 & 0.635 \\
 CatBoost & 266.3 & 9.98 & 0.652 \\
 Random Forest & 263.0 & 9.73 & 0.656 \\
 XGBoost & 260.9 & 9.75 & 0.659 \\
 LightGBM & 260.8 & 9.70 & 0.659 \\
-\textbf{SLSQP blend} & \textbf{257.0} & \textbf{9.66} & \textbf{0.664} \\
+\textbf{SLSQP blend} & \textbf{256.1} & \textbf{9.67} & \textbf{0.665} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -859,7 +882,8 @@ LightGBM & 260.8 & 9.70 & 0.659 \\
 \subsection{Temporal robustness}
 To confirm that the method is not tuned to a single window, the identical pipeline
 was applied to the three setups of Table~\ref{tab:setups}.
-Table~\ref{tab:temporal} and Fig.~\ref{fig:temporal} report the blend performance.
+Table~\ref{tab:temporal} and Fig.~\ref{fig:temporal} report the blend performance,
+now with the MLP included as a sixth learner in all three setups.
 Accuracy is stable across all three independent target quarters, and the
 seven-month history of Setup~C yields the strongest result, confirming that deeper
 behavioural history helps. The stability across periods is meaningful because the
@@ -881,8 +905,8 @@ February--April window, accuracy recovers and surpasses the other two settings.
 Setup & Target quarter & Blend $R^2$ \\
 \midrule
 A & Q4 2025 & 0.645 \\
-B & Q1 2026 & 0.574 \\
-\textbf{C} & \textbf{Feb--Apr 2026} & \textbf{0.664} \\
+B & Q1 2026 & 0.575 \\
+\textbf{C} & \textbf{Feb--Apr 2026} & \textbf{0.665} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -928,13 +952,13 @@ censored target. Clipping removes impossible predictions but not this boundary
 bias, which motivates the hurdle experiment reported next and the two-stage
 extension discussed in Section~\ref{sec:limits}.
 
-\begin{figure}[!t]
+\begin{figure*}[!t]
 \centering
-\includegraphics[width=\columnwidth]{fig7_residuals.png}
+\includegraphics[width=0.96\textwidth]{fig7_residuals.png}
 \caption{Residual diagnostics for the blend: (a) residual vs.\ fitted, (b)
 residual vs.\ true with boundary bands, (c) residual histogram, (d) normal Q--Q.}
 \label{fig:resid}
-\end{figure}
+\end{figure*}
 
 \begin{figure}[!t]
 \centering
@@ -948,7 +972,8 @@ low/zero range (red) and under-predicts the high range (green).}
 Figure~\ref{fig:imp} shows the gain-based feature importances of the XGBoost
 learner. The ranking is dominated by \emph{recent behavioural} signals: the most
 recent month's booking rate and booked count (from January 2026, immediately
-before the target quarter), the platform's own trailing occupancy estimate, the
+before the target quarter), a recency-weighted booking-rate feature, the
+platform's own trailing occupancy estimate, the
 seven-month booked total, and review recency. Static property and host metadata,
 text keywords, and geography play only a supporting role. This confirms the
 narrative of the residual and ablation analyses: demand is driven overwhelmingly
@@ -956,14 +981,14 @@ by a listing's own recent activity, which is why deeper and more recent history 
 the feature-side lever that matters and why additional engineered families are
 redundant once this signal is present.
 
-\begin{figure}[!t]
+\begin{figure*}[!t]
 \centering
-\includegraphics[width=\columnwidth]{fig9_importance.png}
+\includegraphics[width=0.96\textwidth]{fig9_importance.png}
 \caption{XGBoost gain importances (Setup~C). Recent behavioural features---the
-latest month's booking rate and count, trailing occupancy, and review
-recency---dominate; static metadata is secondary.}
+latest month's booking rate and count, a recency-weighted booking rate, trailing
+occupancy, and review recency---dominate; static metadata is secondary.}
 \label{fig:imp}
-\end{figure}
+\end{figure*}
 
 \subsection{Failure-case analysis}
 A sample-level inspection of the largest errors complements the aggregate metrics.
@@ -1126,9 +1151,11 @@ A feature can thus be individually informative and jointly redundant, and only a
 proper ablation---rather than a correlation ranking---reveals which is the case.
 
 \paragraph{The hurdle model does not help}
-On the held-out test the two-stage hurdle of \eqref{eq:hurdle} attains an
-\emph{identical} $R^2$ ($0.653$) to the direct blend; its small cross-validation
-advantage ($+0.002$) does not survive on unbiased data. The gradient-boosted blend
+On the held-out test the two-stage hurdle of \eqref{eq:hurdle} attains an $R^2$ of
+$0.653$, marginally below the six-learner direct blend's $0.654$; its small
+cross-validation advantage over the base blend ($+0.002$) does not survive on
+unbiased data, and the hurdle formulation was not re-evaluated with the MLP
+included. The gradient-boosted blend
 therefore already absorbs the zero inflation as well as an explicit hurdle, and
 the simpler model is preferred. This finding is worth stating carefully because the
 hurdle model is often recommended almost reflexively for zero-inflated targets. Its
@@ -1213,8 +1240,8 @@ This paper presented a leakage-safe pipeline for forecasting quarterly short-ter
 snapshots. Because the Inside Airbnb calendars expose only a Boolean availability
 flag and no usable price, the demand target was reconstructed by snapshot
 differencing, yielding a censored, zero-inflated booking signal. A convex SLSQP
-blend of five heterogeneous learners, trained on a seven-month behavioural history,
-attained a $20\%$ held-out test $R^2$ of $0.653$ that closely matched its
+blend of six heterogeneous learners, trained on a seven-month behavioural history,
+attained a $20\%$ held-out test $R^2$ of $0.654$ that closely matched its
 cross-validation estimate, and its advantage over the best single learner was
 statistically significant. The method proved robust across three independent
 target quarters. A controlled ablation established that the dominant levers are the

@@ -208,6 +208,14 @@ for p in d.paragraphs:
             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
 # ---------------------------------------------------------------- shrink figures to column width
+# NOTE: fig7_residuals (2x2 diagnostic grid) and fig9_importance (18-label bar chart) are
+# information-dense and become illegible once forced into a single ~3.3in column (fonts shrink
+# below 4pt). In the shipped manuscript these two are instead widened to full text-width
+# (~7.0in) and wrapped in their own 1-column continuous-section-break block (see the
+# "figure*"-equivalent fix applied directly to the submitted docx / to main_p2.tex's
+# \begin{figure*} blocks). That widening is NOT yet automated here -- a from-scratch rebuild
+# through this script will still shrink them to column width and need the same manual fix
+# reapplied. Treat this as a known TODO for the next full pipeline rebuild.
 COLW = Emu(int(3.30 * 914400))  # ~3.30 in column
 for shp in d.inline_shapes:
     w, h = shp.width, shp.height
