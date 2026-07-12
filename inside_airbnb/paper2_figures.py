@@ -17,11 +17,23 @@ ax.set_xlabel('Booked nights in Feb-Mar-Apr 2026 (target)'); ax.set_ylabel('Numb
 ax.set_title('Target distribution (zero-inflated, bounded)')
 save(fig,'fig1_target_dist')
 
-# ---- Fig 2: availability distribution / blocking (real: ~77% f) ----
+# ---- Fig 2: availability distribution / blocking ----
+# Recomputed live from the raw September 2025 calendar (same snapshot Table II is
+# anchored to), so this number can never silently drift from the real data again.
+# Reading only the 'available' column in chunks takes a few seconds.
+_cal_path = Path('Internship/AirBnb_Inside/2025_Inside_Airbnb/Q3/September2025/calendar.csv')
+_n_t = _n_f = 0
+for _ch in pd.read_csv(_cal_path, usecols=['available'], chunksize=2_000_000):
+    _vc = _ch['available'].value_counts()
+    _n_t += _vc.get('t', 0); _n_f += _vc.get('f', 0)
+_tot = _n_t + _n_f
+avail_pct, unavail_pct = 100 * _n_t / _tot, 100 * _n_f / _tot
+print(f'Fig 2 (Sep 2025 calendar, n={_tot:,}): available={avail_pct:.1f}% unavailable={unavail_pct:.1f}%')
+
 fig,ax=plt.subplots(figsize=(5.2,4.2))
-ax.bar(['available (t)','unavailable (f)'],[22.9,77.1],color=['steelblue','firebrick'])
-for i,v in enumerate([22.9,77.1]): ax.text(i,v,f'{v:.0f}%',ha='center',va='bottom')
-ax.set_ylabel('Share of calendar-days (%)'); ax.set_title('Calendar availability (NYC 2026)'); ax.set_ylim(0,90)
+ax.bar(['available (t)','unavailable (f)'],[avail_pct,unavail_pct],color=['steelblue','firebrick'])
+for i,v in enumerate([avail_pct,unavail_pct]): ax.text(i,v,f'{v:.0f}%',ha='center',va='bottom')
+ax.set_ylabel('Share of calendar-days (%)'); ax.set_title('Calendar availability (NYC, Sep 2025 snapshot)'); ax.set_ylim(0,90)
 save(fig,'fig2_availability')
 
 # ---- Fig 3: price coverage by month (real measurements) ----

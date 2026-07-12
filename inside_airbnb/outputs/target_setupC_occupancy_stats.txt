@@ -1,0 +1,9 @@
+SETUP C NAIVE OCCUPANCY TARGET (Feb-Mar-Apr 2026, unavailable-day count)
+====================================================================
+listings (January 2026 universe) : 36,282
+mean                             : 53.98
+median                           : 66.0
+std                              : 36.22
+skewness                         : -0.38
+share y == 0                     : 10.7%
+max                              : 89
