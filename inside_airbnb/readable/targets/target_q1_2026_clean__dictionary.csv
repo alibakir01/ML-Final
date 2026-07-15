@@ -1,0 +1,4 @@
+﻿column,dtype,non_null_%,example_or_stats
+listing_id,int64,100.0,min=2539.00 | mean=495198146663244288.00 | max=1598134939144730880.00
+y_clean,int64,100.0,min=0.00 | mean=16.30 | max=90.00
+y_orig,int64,100.0,min=0.00 | mean=14.42 | max=90.00

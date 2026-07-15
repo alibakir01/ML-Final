@@ -1,0 +1,4 @@
+SETUP C TARGET (Feb-Mar-Apr 2026, clean)
+==============================================
+y_clean   mean=19.22 median=2.0 std=27.65 %zero=47.7
+y_orig    mean=16.20 median=0.0 std=26.44 %zero=55.4

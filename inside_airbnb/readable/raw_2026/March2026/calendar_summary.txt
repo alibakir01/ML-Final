@@ -1,0 +1,6 @@
+March2026 calendar.csv ozet
+sutunlar: ['listing_id', 'date', 'available', 'minimum_nights', 'maximum_nights']
+tarih araligi (yaklasik): 2026-03-16  ->  2027-03-15
+available dagilimi (ilk 1M satir): {'f': 786965, 't': 213035}
+price sutunu YOK (bu snapshot fiyatsiz)
+benzersiz listing (ilk 1M): 2,740

@@ -1,0 +1,24 @@
+DEEP EDA -- Setup A (clean target y_clean, n=36111)
+============================================================
+target: mean=21.85 median=2.0 std=29.56 %zero=46.9
+warm listings (Q3 history): 35,466 (98.2%)  | cold-start: 645
+  warm target mean=21.97  | cold-start target mean=15.49
+listings with any review: 24,440 (67.7%)
+  with-review target mean=23.34  | no-review target mean=18.74
+
+TOP-15 |correlation| with target:
+  recency_booked_sep         +0.627
+  booked_m09                 +0.627
+  trend_sep_minus_jul        +0.627
+  q3_booking_rate            +0.615
+  q3_booked                  +0.613
+  q3_changes                 +0.612
+  rev_recency_days           -0.510
+  days_since_last_review     -0.510
+  host_response_rate_missing -0.466
+  booked_m08                 +0.402
+  estimated_occupancy_l365d  +0.380
+  days_since_first_review    -0.293
+  host_is_superhost          +0.288
+  license_missing            -0.159
+  reviews_per_month          +0.136

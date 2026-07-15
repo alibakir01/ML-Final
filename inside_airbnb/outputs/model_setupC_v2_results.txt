@@ -1,0 +1,11 @@
+RESULTS [setupC_v2] target=y_clean (5-fold CV, n=36282)
+============================================================
+Model                   MSE     MAE      R2
+LinearRegression     318.49   11.72   0.584
+RandomForest         264.06    9.74   0.655
+XGBoost              260.90    9.74   0.659
+LightGBM             260.98    9.69   0.659
+CatBoost             265.11    9.96   0.653
+SLSQP blend          257.03    9.67   0.664
+
+Blend weights: LinearRegression=0.000, RandomForest=0.361, XGBoost=0.197, LightGBM=0.334, CatBoost=0.107

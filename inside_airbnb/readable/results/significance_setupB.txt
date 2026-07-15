@@ -1,0 +1,9 @@
+SIGNIFICANCE [setupB] best single (LightGBM, MSE=281.47) vs SLSQP blend (MSE=279.17)
+==================================================================
+n                       : 36282
+mean SE diff (best-blend): 2.3015
+95% CI                  : [1.5482, 3.0547]
+paired t-test           : t=5.9883, p=2.140e-09
+Wilcoxon                : W=251122083.0, p=1.925e-14
+Cohen's d_z             : 0.0314
+verdict                 : SIGNIFICANT (p<0.05, CI excludes 0)

@@ -1,0 +1,11 @@
+TARGET: occupied (booked/blocked) nights in Q4 2025  [0, 92]
+==============================================================
+listings (October 2025 universe) : 36,111
+mean                             : 57.39
+median                           : 73.0
+std                              : 32.49
+skewness                         : -0.71
+share y == 0                     : 8.0%
+share y >= 90                    : 0.0%
+share y == 92                    : 0.0%
+max                              : 88

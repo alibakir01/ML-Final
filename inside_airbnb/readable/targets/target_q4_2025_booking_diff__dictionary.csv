@@ -1,0 +1,3 @@
+﻿column,dtype,non_null_%,example_or_stats
+listing_id,int64,100.0,min=2595.00 | mean=466790625367679360.00 | max=1521848367963498240.00
+y_booked_q4,int64,100.0,min=0.00 | mean=18.99 | max=92.00

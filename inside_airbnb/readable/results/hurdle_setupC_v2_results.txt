@@ -1,0 +1,9 @@
+HURDLE [setupC_v2] target=y_clean (5-fold CV, n=36282)
+==========================================================
+Variant                       MSE      R2
+hurdle_xgb_EV              258.75   0.662
+hurdle_xgb_gate            286.06   0.626
+hurdle_lgb_EV              260.32   0.660
+hurdle_lgb_gate            287.93   0.623
+HURDLE+single blend        255.68   0.666
+blend weights: hurdle_xgb_EV=0.15, hurdle_lgb_EV=0.26, single_blend=0.59

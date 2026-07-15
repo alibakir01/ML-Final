@@ -1,0 +1,7 @@
+REVIEW-FUSED TARGET (Setup C, Feb-Mar-Apr 2026)
+==================================================
+y_clean   mean=19.22 median=2.0 std=27.65 %zero=47.7
+y_review  mean=2.88 median=0.0 std=10.86 %zero=86.6
+y_fused   mean=20.05 median=2.0 std=28.30 %zero=47.4
+listings where review added nights: 1,304 (3.6%)
+corr(y_fused, y_clean) = 0.976

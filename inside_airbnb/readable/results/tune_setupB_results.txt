@@ -1,0 +1,9 @@
+TUNING [setupB] target=y_booked_q1_2026 (30 configs/family, 5-fold CV)
+============================================================
+tuned XGBoost  MSE=279.46  R2=0.532
+tuned LightGBM MSE=280.73  R2=0.530
+tuned blend    MSE=277.27  R2=0.536
+blend weights: XGBoost_tuned=0.383, LightGBM_tuned=0.342, RandomForest=0.137, CatBoost=0.138, LinearRegression=0.000
+
+best XGBoost cfg: {'n_estimators': 721, 'learning_rate': 0.02775966359517531, 'max_depth': 8, 'min_child_weight': 5, 'subsample': 0.7941046754555421, 'colsample_bytree': 0.6223360396364613, 'reg_lambda': 4.960634585017072, 'reg_alpha': 0.07852233350555968}
+best LightGBM cfg: {'n_estimators': 1139, 'learning_rate': 0.02611496021800793, 'num_leaves': 80, 'min_child_samples': 17, 'subsample': 0.7286291335402948, 'colsample_bytree': 0.7282373574391866, 'reg_lambda': 1.2396924540333643}

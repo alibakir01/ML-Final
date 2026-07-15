@@ -1,0 +1,10 @@
+TARGET (booking-differencing): newly-booked nights in Q4 2025  [0,92]
+================================================================
+listings (October 2025 universe) : 36,111
+mean                             : 18.99
+median                           : 0.0
+std                              : 28.57
+skewness                         : 1.32
+share y == 0                     : 53.2%
+share y >= 60                    : 14.0%
+max                              : 92

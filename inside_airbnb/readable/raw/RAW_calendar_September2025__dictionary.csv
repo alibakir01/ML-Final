@@ -1,0 +1,8 @@
+﻿column,dtype,non_null_%,example_or_stats
+listing_id,int64,100.0,min=2539.00 | mean=173427.02 | max=328040.00
+date,str,100.0,2025-09-02 | 2025-09-03 | 2025-09-04
+available,str,100.0,f | t
+price,float64,0.0,min=nan | mean=nan | max=nan
+adjusted_price,float64,0.0,min=nan | mean=nan | max=nan
+minimum_nights,int64,100.0,min=30.00 | mean=30.00 | max=30.00
+maximum_nights,int64,100.0,min=730.00 | mean=937.38 | max=1125.00

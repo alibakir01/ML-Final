@@ -1,0 +1,4 @@
+CLEANER Q4 2025 TARGET
+============================================
+y_clean   mean=21.85 median=2.0 std=29.56 %zero=46.9
+y_orig    mean=18.99 median=0.0 std=28.57 %zero=53.2
