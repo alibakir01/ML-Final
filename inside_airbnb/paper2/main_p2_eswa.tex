@@ -1,13 +1,11 @@
 %==============================================================================
 % Forecasting quarterly short-term-rental demand from public availability
 % snapshots -- 2025-2026 New York City Inside Airbnb data.
-% Standalone, double-blind IEEE double-column reference manuscript.
-% Build:  pandoc main_p2.tex -> docx  ->  build_paper2.py  ->  Word/PDF
-%         (or upload the paper2/ folder to Overleaf and compile main_p2.tex)
-% Companion single-column Elsevier/ESWA submission copy: main_p2_eswa.tex
-% (same content, elsarticle.cls). Keep both in sync when editing the text.
+% Standalone, double-blind Elsevier (ESWA) single-column submission manuscript.
+% Build: upload the paper2/ folder to Overleaf and compile main_p2_eswa.tex
+% (companion double-column IEEEtran version: main_p2.tex)
 %==============================================================================
-\documentclass[journal]{IEEEtran}
+\documentclass[review,12pt]{elsarticle}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{graphicx}
 \usepackage{textcomp}
@@ -16,20 +14,22 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{xcolor}
+\usepackage{lineno}
+\usepackage{natbib}
+\usepackage{longtable}
 \graphicspath{{figures/}}
 \hyphenation{short-term}
+\journal{Expert Systems With Applications}
 
 \begin{document}
+
+\begin{frontmatter}
 
 \title{An Intelligent Predictive Framework for Short-Term Rental Demand:
 Snapshot-Differencing and Convex Ensembling on Zero-Inflated Data}
 
-\author{Anonymous Author(s)%
-\thanks{Author names and affiliations omitted for double-blind review.}}
-
-\markboth{Manuscript submitted for review}%
-{An Intelligent Predictive Framework for Short-Term Rental Demand}
-\maketitle
+\author{Anonymous Author(s)\corref{cor1}}
+\cortext[cor1]{Author names and affiliations omitted for double-blind review.}
 
 \begin{abstract}
 Accurately forecasting how heavily a short-term rental will be booked is valuable
@@ -57,14 +57,17 @@ Achievable accuracy on this public source is bounded primarily by label quality,
 not model capacity.
 \end{abstract}
 
-\begin{IEEEkeywords}
-Short-term rental demand forecasting, Inside Airbnb, zero-inflated regression,
-gradient boosting, target encoding, convex model blending, snapshot differencing.
-\end{IEEEkeywords}
+\begin{keyword}
+Short-term rental demand forecasting \sep Inside Airbnb \sep zero-inflated regression \sep gradient boosting \sep target encoding \sep convex model blending \sep snapshot differencing
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
 
 %==============================================================================
 \section{Introduction}
-\IEEEPARstart{S}{hort-term} rental (STR) platforms such as Airbnb have reshaped
+Short-term rental (STR) platforms such as Airbnb have reshaped
 urban accommodation, and the volume of nights a listing will be booked over a
 future period is one of the most consequential quantities in the ecosystem. A
 host who anticipates a busy quarter can schedule maintenance, adjust pricing, and
@@ -114,7 +117,7 @@ A further, and often under-appreciated, difficulty concerns the \emph{data sourc
 itself. Much of the earlier STR-modelling literature relied on richer public
 datasets that exposed an explicit per-day booking or reservation record and a
 per-day price. Contemporary public snapshots---most prominently those distributed
-by the Inside Airbnb project \cite{insideairbnb}---have converged on a much coarser
+by the Inside Airbnb project \citep{insideairbnb}---have converged on a much coarser
 format: the daily calendar exposes only a Boolean \texttt{available} field
 (true/false), with no explicit ``booked'' status, and, as we document in
 Section~\ref{sec:data}, the calendar price field has become empty in recent
@@ -175,14 +178,14 @@ We organise related work into five threads.
 
 \subsection{Machine learning for short-term-rental prediction}
 A substantial body of work applies machine learning to Airbnb data, predominantly
-for price prediction. Tang, Cheng, and Zhang \cite{tang2024} compared ten
+for price prediction. Tang, Cheng, and Zhang \citeyearpar{tang2024} compared ten
 algorithms on Sydney listings and found gradient-boosted trees, and CatBoost in
-particular, to be strongest. Camatti et al.\ \cite{camatti2024} contrasted
+particular, to be strongest. Camatti et al.\ \citeyearpar{camatti2024} contrasted
 artificial-intelligence and traditional methods on Dutch listings and observed
 that tree-based and neural approaches overfit less than linear regression.
-Rezazadeh Kalehbasti et al.\ \cite{kalehbasti2019} predicted New York City prices
+Rezazadeh Kalehbasti et al.\ \citeyearpar{kalehbasti2019} predicted New York City prices
 from property attributes, host characteristics, and review sentiment. Islam et
-al.\ \cite{islam2022} combined a topic model over descriptions with an XGBoost
+al.\ \citeyearpar{islam2022} combined a topic model over descriptions with an XGBoost
 regressor. Two lessons recur across this literature and inform the present work:
 the most useful predictors mix structural attributes, location, and dynamic
 calendar or review information; and gradient-boosted trees are a strong default on
@@ -198,12 +201,12 @@ held-out test set, validation across three independent quarters, and a feature
 construction that is leakage-safe by design.
 
 \subsection{Decision trees and gradient boosting}
-The decision tree \cite{quinlan1986} yields interpretable, non-parametric
-regressors, but a single tree overfits. Bagging \cite{breiman1996} and Random
-Forests \cite{breiman2001} reduce variance by averaging decorrelated trees, while
-gradient boosting \cite{friedman2001} reduces bias by fitting residuals
-sequentially. XGBoost \cite{chen2016xgboost}, LightGBM \cite{ke2017lightgbm}, and
-CatBoost \cite{prokhorenkova2018catboost} are widely used, highly optimised
+The decision tree \citep{quinlan1986} yields interpretable, non-parametric
+regressors, but a single tree overfits. Bagging \citep{breiman1996} and Random
+Forests \citep{breiman2001} reduce variance by averaging decorrelated trees, while
+gradient boosting \citep{friedman2001} reduces bias by fitting residuals
+sequentially. XGBoost \citep{chen2016xgboost}, LightGBM \citep{ke2017lightgbm}, and
+CatBoost \citep{prokhorenkova2018catboost} are widely used, highly optimised
 implementations with regularisation, sparsity-aware splitting, and efficient
 categorical handling; all three are used here as base learners. Their inductive biases differ enough to
 make them useful ensemble members: Random Forest reduces variance through bagging
@@ -219,7 +222,7 @@ to the blend.
 \subsection{Leakage-safe preprocessing and target encoding}
 Careful preprocessing---imputation, encoding, and, above all, preventing leakage
 by fitting every transform inside the training fold---has a large effect on the
-final error \cite{pedregosa2011sklearn}. High-cardinality categoricals such as
+final error \citep{pedregosa2011sklearn}. High-cardinality categoricals such as
 neighbourhood are commonly handled by target (mean) encoding; a leakage-aware
 variant computes the encoding inside an inner cross-validation loop so that no row
 informs its own encoded value. We adopt this $K$-fold target encoder with additive
@@ -234,7 +237,7 @@ encoding introduces when a row is allowed to see its own label.
 
 \subsection{Model blending and stacking}
 Rather than selecting a single estimator, combining several models often improves
-accuracy. Stacked generalisation \cite{wolpert1992stacked} learns a meta-model
+accuracy. Stacked generalisation \citep{wolpert1992stacked} learns a meta-model
 over base predictions; a simpler and more robust variant constrains the
 combination to a convex weighting of the base learners. We use the latter,
 optimising the weights on out-of-fold predictions. The convex constraint is not
@@ -249,8 +252,8 @@ convex blend, which is why the constrained formulation is adopted throughout.
 \subsection{Zero-inflated targets and occupancy estimation}
 Count targets with excess zeros motivate dedicated models: zero-inflated and
 hurdle (two-part) models separate the ``is it booked at all'' decision from the
-positive count, and censored-regression estimators such as Tobit \cite{tobin1958}
-treat the bound explicitly. Dietterich \cite{dietterich1998} recommends paired
+positive count, and censored-regression estimators such as Tobit \citep{tobin1958}
+treat the bound explicitly. Dietterich \citeyearpar{dietterich1998} recommends paired
 resampling tests for comparing learners, which we adopt. The blending literature also cautions that combining models is not automatically
 beneficial: an equal-weight average can be dragged down by weak members and an
 unconstrained stack can overfit at the meta-level. The convex formulation used here
@@ -276,7 +279,7 @@ suppress.
 \section{Data and Problem Setting}
 \label{sec:data}
 \subsection{Data source and snapshots}
-The study uses public Inside Airbnb snapshots \cite{insideairbnb} for New York
+The study uses public Inside Airbnb snapshots \citep{insideairbnb} for New York
 City. Ten consecutive monthly snapshots are available, spanning July 2025 through
 April 2026. Each snapshot contains a \texttt{listings} table (per-property
 attributes: property and room type, capacity, bedrooms and bathrooms, host flags,
@@ -675,9 +678,9 @@ modelling decision in the study.
 \subsection{Base learners}
 Six heterogeneous learners span the linear, bagging, boosting, and neural-network
 families: Linear Regression (a scaled interpretable baseline), Random Forest
-\cite{breiman2001}, XGBoost \cite{chen2016xgboost}, LightGBM \cite{ke2017lightgbm},
-CatBoost \cite{prokhorenkova2018catboost}, and a PyTorch \cite{paszke2019pytorch}
-multi-layer perceptron trained with the Adam optimiser \cite{kingma2015adam}. The
+\citep{breiman2001}, XGBoost \citep{chen2016xgboost}, LightGBM \citep{ke2017lightgbm},
+CatBoost \citep{prokhorenkova2018catboost}, and a PyTorch \citep{paszke2019pytorch}
+multi-layer perceptron trained with the Adam optimiser \citep{kingma2015adam}. The
 MLP has three hidden layers ($256\!\to\!128\!\to\!64$) with batch normalisation,
 ReLU, and dropout, and is trained directly on the raw (untransformed) target; a
 $\log(1+y)$ transform, effective in an earlier formulation of this problem on
@@ -1026,13 +1029,13 @@ censored target. Clipping removes impossible predictions but not this boundary
 bias, which motivates the hurdle experiment reported next and the two-stage
 extension discussed in Section~\ref{sec:limits}.
 
-\begin{figure*}[!t]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=0.96\textwidth]{fig7_residuals.png}
 \caption{Residual diagnostics for the blend: (a) residual vs.\ fitted, (b)
 residual vs.\ true with boundary bands, (c) residual histogram, (d) normal Q--Q.}
 \label{fig:resid}
-\end{figure*}
+\end{figure}
 
 \begin{figure}[!t]
 \centering
@@ -1055,14 +1058,14 @@ by a listing's own recent activity, which is why deeper and more recent history 
 the feature-side lever that matters and why additional engineered families are
 redundant once this signal is present.
 
-\begin{figure*}[!t]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=0.96\textwidth]{fig9_importance.png}
 \caption{XGBoost gain importances (Setup~C). Recent behavioural features---the
 latest month's booking rate and count, a recency-weighted booking rate, trailing
 occupancy, and review recency---dominate; static metadata is secondary.}
 \label{fig:imp}
-\end{figure*}
+\end{figure}
 
 \subsection{Failure-case analysis}
 A sample-level inspection of the largest errors complements the aggregate metrics.
@@ -1396,7 +1399,7 @@ precise reasons it cannot be pushed further without a cleaner label, we hope to 
 practitioners a realistic basis for deciding when public snapshots suffice and when
 a direct booking signal must be sought, and to give subsequent researchers a
 transparent, reproducible point of departure.
-\appendices
+\appendix
 \section{Complete Feature Inventory}
 \label{sec:appendixA}
 Table~\ref{tab:allfeat} lists the complete inventory of all 77 columns in the
@@ -1407,47 +1410,66 @@ geographic, and text-keyword families are summarised at the family level in
 Table~\ref{tab:featfam} and Table~\ref{tab:featinv}; this appendix gives the
 per-column detail underlying those summaries.
 
-\begin{table*}[!t]
-\caption{Detailed list of all 77 columns in the processed Setup~C feature matrix
-(identifier, target, and 75 features).}
-\label{tab:allfeat}
-\centering
-\scriptsize
-\begin{tabular}{lc|lc|lc}
+\footnotesize
+\begin{longtable}{lc|lc}
+\caption{Detailed list of all 77 columns in the processed Setup~C feature matrix (identifier, target, and 75 features).}
+\label{tab:allfeat}\\
 \toprule
-Feature Name & Type & Feature Name & Type & Feature Name & Type \\
+Feature Name & Type & Feature Name & Type \\
 \midrule
-\texttt{listing\_id} & integer (ID) & \texttt{property\_type} & string & \texttt{has\_reviews} & binary \\
-\texttt{hq3\_booked} & float & \texttt{room\_type} & string & \texttt{host\_age\_days} & float \\
-\texttt{hq3\_occupied} & float & \texttt{accommodates} & integer & \texttt{days\_since\_first\_review} & float \\
-\texttt{hq3\_obs\_days} & float & \texttt{bathrooms} & float & \texttt{days\_since\_last\_review} & float \\
-\texttt{hq3\_changes} & float & \texttt{bedrooms} & float & \texttt{bed\_bath\_ratio} & float \\
-\texttt{hq3\_booking\_rate} & float & \texttt{beds} & float & \texttt{kw\_luxury} & binary \\
-\texttt{hq3\_occ\_rate} & float & \texttt{minimum\_nights} & float & \texttt{kw\_private} & binary \\
-\texttt{hq4\_booked} & float & \texttt{maximum\_nights} & float & \texttt{kw\_cozy} & binary \\
-\texttt{hq4\_occupied} & float & \texttt{host\_is\_superhost} & binary & \texttt{kw\_modern} & binary \\
-\texttt{hq4\_obs\_days} & float & \texttt{host\_response\_rate} & float & \texttt{kw\_spacious} & binary \\
-\texttt{hq4\_changes} & float & \texttt{host\_acceptance\_rate} & float & \texttt{kw\_view} & binary \\
-\texttt{hq4\_booking\_rate} & float & \texttt{host\_listings\_count} & float & \texttt{kw\_near} & binary \\
-\texttt{hq4\_occ\_rate} & float & \texttt{host\_total\_listings\_count} & float & \texttt{kw\_studio} & binary \\
-\texttt{hjan\_booked} & integer & \texttt{instant\_bookable} & binary & \texttt{title\_len} & integer \\
-\texttt{hjan\_occ} & integer & \texttt{number\_of\_reviews} & integer & \texttt{title\_words} & integer \\
-\texttt{hjan\_obs} & integer & \texttt{number\_of\_reviews\_ltm} & integer & \texttt{review\_scores\_rating\_missing} & binary \\
-\texttt{hjan\_booking\_rate} & float & \texttt{number\_of\_reviews\_l30d} & integer & \texttt{host\_response\_rate\_missing} & binary \\
-\texttt{h7\_booked\_total} & float & \texttt{reviews\_per\_month} & float & \texttt{reviews\_per\_month\_missing} & binary \\
-\texttt{trend\_q4\_q3} & float & \texttt{review\_scores\_rating} & float & \texttt{estimated\_occupancy\_l365d\_missing} & binary \\
-\texttt{trend\_jan\_q4} & float & \texttt{review\_scores\_accuracy} & float & \texttt{geo\_cluster} & string \\
-\texttt{momentum} & float & \texttt{review\_scores\_cleanliness} & float & \texttt{rev\_total} & float \\
-\texttt{recency\_booking\_rate} & float & \texttt{review\_scores\_location} & float & \texttt{rev\_90} & float \\
-\texttt{neighbourhood\_cleansed} & string & \texttt{review\_scores\_value} & float & \texttt{rev\_365} & float \\
-\texttt{neighbourhood\_group\_cleansed} & string & \texttt{estimated\_occupancy\_l365d} & integer & \texttt{rev\_recency\_days} & float \\
-\texttt{latitude} & float & \texttt{estimated\_revenue\_l365d} & float & \texttt{y\_clean} & integer (target) \\
-\texttt{longitude} & float & \texttt{license\_missing} & binary & & \\
+\endfirsthead
+\multicolumn{4}{l}{\tablename\ \thetable{} -- continued from previous page}\\
+\toprule
+Feature Name & Type & Feature Name & Type \\
+\midrule
+\endhead
+\midrule \multicolumn{4}{r}{continued on next page}\\
+\endfoot
 \bottomrule
-\end{tabular}
-\end{table*}
+\endlastfoot
+\texttt{listing\_id} & integer (ID) & \texttt{instant\_bookable} & binary \\
+\texttt{hq3\_booked} & float & \texttt{number\_of\_reviews} & integer \\
+\texttt{hq3\_occupied} & float & \texttt{number\_of\_reviews\_ltm} & integer \\
+\texttt{hq3\_obs\_days} & float & \texttt{number\_of\_reviews\_l30d} & integer \\
+\texttt{hq3\_changes} & float & \texttt{reviews\_per\_month} & float \\
+\texttt{hq3\_booking\_rate} & float & \texttt{review\_scores\_rating} & float \\
+\texttt{hq3\_occ\_rate} & float & \texttt{review\_scores\_accuracy} & float \\
+\texttt{hq4\_booked} & float & \texttt{review\_scores\_cleanliness} & float \\
+\texttt{hq4\_occupied} & float & \texttt{review\_scores\_location} & float \\
+\texttt{hq4\_obs\_days} & float & \texttt{review\_scores\_value} & float \\
+\texttt{hq4\_changes} & float & \texttt{estimated\_occupancy\_l365d} & integer \\
+\texttt{hq4\_booking\_rate} & float & \texttt{estimated\_revenue\_l365d} & float \\
+\texttt{hq4\_occ\_rate} & float & \texttt{license\_missing} & binary \\
+\texttt{hjan\_booked} & integer & \texttt{has\_reviews} & binary \\
+\texttt{hjan\_occ} & integer & \texttt{host\_age\_days} & float \\
+\texttt{hjan\_obs} & integer & \texttt{days\_since\_first\_review} & float \\
+\texttt{hjan\_booking\_rate} & float & \texttt{days\_since\_last\_review} & float \\
+\texttt{h7\_booked\_total} & float & \texttt{bed\_bath\_ratio} & float \\
+\texttt{trend\_q4\_q3} & float & \texttt{kw\_luxury} & binary \\
+\texttt{trend\_jan\_q4} & float & \texttt{kw\_private} & binary \\
+\texttt{momentum} & float & \texttt{kw\_cozy} & binary \\
+\texttt{recency\_booking\_rate} & float & \texttt{kw\_modern} & binary \\
+\texttt{neighbourhood\_cleansed} & string & \texttt{kw\_spacious} & binary \\
+\texttt{neighbourhood\_group\_cleansed} & string & \texttt{kw\_view} & binary \\
+\texttt{latitude} & float & \texttt{kw\_near} & binary \\
+\texttt{longitude} & float & \texttt{kw\_studio} & binary \\
+\texttt{property\_type} & string & \texttt{title\_len} & integer \\
+\texttt{room\_type} & string & \texttt{title\_words} & integer \\
+\texttt{accommodates} & integer & \texttt{review\_scores\_rating\_missing} & binary \\
+\texttt{bathrooms} & float & \texttt{host\_response\_rate\_missing} & binary \\
+\texttt{bedrooms} & float & \texttt{reviews\_per\_month\_missing} & binary \\
+\texttt{beds} & float & \texttt{estimated\_occupancy\_l365d\_missing} & binary \\
+\texttt{minimum\_nights} & float & \texttt{geo\_cluster} & string \\
+\texttt{maximum\_nights} & float & \texttt{rev\_total} & float \\
+\texttt{host\_is\_superhost} & binary & \texttt{rev\_90} & float \\
+\texttt{host\_response\_rate} & float & \texttt{rev\_365} & float \\
+\texttt{host\_acceptance\_rate} & float & \texttt{rev\_recency\_days} & float \\
+\texttt{host\_listings\_count} & float & \texttt{y\_clean} & integer (target) \\
+\texttt{host\_total\_listings\_count} & float &  &  \\
+\end{longtable}
+\normalsize
 
-\bibliographystyle{IEEEtran}
+\bibliographystyle{elsarticle-harv}
 \bibliography{references}
 
 \end{document}

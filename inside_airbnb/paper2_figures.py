@@ -9,15 +9,7 @@ plt.rcParams.update({'font.size':13,'axes.titlesize':14,'axes.labelsize':13,
 OUT = Path('inside_airbnb/outputs'); FG = Path('inside_airbnb/paper2/figures')
 def save(fig,n): fig.savefig(FG/f'{n}.png',dpi=300,bbox_inches='tight'); fig.savefig(FG/f'{n}.pdf',bbox_inches='tight'); plt.close(fig)
 
-# ---- Fig 1: target distribution (Setup C, Feb-Mar-Apr 2026) ----
-y = pd.read_csv(OUT/'target_setupC_clean.csv')['y_clean'].values
-fig,ax=plt.subplots(figsize=(7,4.2))
-ax.hist(y,bins=90,color='seagreen',edgecolor='none')
-ax.set_xlabel('Booked nights in Feb-Mar-Apr 2026 (target)'); ax.set_ylabel('Number of listings')
-ax.set_title('Target distribution (zero-inflated, bounded)')
-save(fig,'fig1_target_dist')
-
-# ---- Fig 2: availability distribution / blocking ----
+# ---- Fig 1: availability distribution / blocking ----
 # Recomputed live from the raw September 2025 calendar (same snapshot Table II is
 # anchored to), so this number can never silently drift from the real data again.
 # Reading only the 'available' column in chunks takes a few seconds.
@@ -28,23 +20,49 @@ for _ch in pd.read_csv(_cal_path, usecols=['available'], chunksize=2_000_000):
     _n_t += _vc.get('t', 0); _n_f += _vc.get('f', 0)
 _tot = _n_t + _n_f
 avail_pct, unavail_pct = 100 * _n_t / _tot, 100 * _n_f / _tot
-print(f'Fig 2 (Sep 2025 calendar, n={_tot:,}): available={avail_pct:.1f}% unavailable={unavail_pct:.1f}%')
+print(f'Fig 1 (Sep 2025 calendar, n={_tot:,}): available={avail_pct:.1f}% unavailable={unavail_pct:.1f}%')
 
 fig,ax=plt.subplots(figsize=(5.2,4.2))
 ax.bar(['available (t)','unavailable (f)'],[avail_pct,unavail_pct],color=['steelblue','firebrick'])
 for i,v in enumerate([avail_pct,unavail_pct]): ax.text(i,v,f'{v:.0f}%',ha='center',va='bottom')
 ax.set_ylabel('Share of calendar-days (%)'); ax.set_title('Calendar availability (NYC, Sep 2025 snapshot)'); ax.set_ylim(0,90)
-save(fig,'fig2_availability')
+save(fig,'fig1_availability')
 
-# ---- Fig 3: price coverage by month (real measurements) ----
+# ---- Fig 2: price coverage by month (real measurements) ----
 months=['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr']
 cov=[58.7,58.5,58.4,59.1,58.9,0.0,0.0,0.0,59.6,59.1]
 fig,ax=plt.subplots(figsize=(8,4))
 ax.bar(months,cov,color=['firebrick' if c==0 else 'steelblue' for c in cov])
 ax.set_ylabel('listings.csv price non-null (%)'); ax.set_title('Price-field coverage by monthly snapshot (2025-26)')
-ax.axhline(0,color='k',lw=0.8); save(fig,'fig3_price_coverage')
+ax.axhline(0,color='k',lw=0.8); save(fig,'fig2_price_coverage')
 
-# ---- Fig 4: model comparison (held-out test R2), six learners incl. MLP ----
+# ---- Fig 3: demand vs. review recency (Setup C) ----
+_rev = pd.read_parquet(OUT/'features_setupC_v3.parquet', columns=['listing_id','days_since_last_review'])
+_targ = pd.read_csv(OUT/'target_setupC_clean.csv')
+_df10 = _targ.merge(_rev, on='listing_id', how='inner')
+_d10 = _df10['days_since_last_review'].fillna(1e6)  # never-reviewed -> 365+ bin
+_labels10 = ['<30','30-90','90-180','180-365','365+']
+_df10['bin'] = pd.cut(_d10, bins=[-1,30,90,180,365,1e9], labels=_labels10)
+_means10 = _df10.groupby('bin', observed=True)['y_clean'].mean().reindex(_labels10)
+
+plt.rcParams.update({'font.size':13,'axes.titlesize':14,'axes.labelsize':13,
+                     'xtick.labelsize':11,'ytick.labelsize':11})
+fig,ax=plt.subplots(figsize=(7,4.6))
+ax.bar(_labels10, _means10, color='darkorange')
+for i,v in enumerate(_means10): ax.text(i,v,f'{v:.1f}',ha='center',va='bottom')
+ax.set_xlabel('Days since last review'); ax.set_ylabel('Mean booked nights')
+ax.set_title('Demand vs. review recency'); ax.set_ylim(0, max(_means10)*1.15)
+save(fig,'fig3_review')
+
+# ---- Fig 4: target distribution (Setup C, Feb-Mar-Apr 2026) ----
+y = pd.read_csv(OUT/'target_setupC_clean.csv')['y_clean'].values
+fig,ax=plt.subplots(figsize=(7,4.2))
+ax.hist(y,bins=90,color='seagreen',edgecolor='none')
+ax.set_xlabel('Booked nights in Feb-Mar-Apr 2026 (target)'); ax.set_ylabel('Number of listings')
+ax.set_title('Target distribution (zero-inflated, bounded)')
+save(fig,'fig4_target_dist')
+
+# ---- Fig 5: model comparison (held-out test R2), six learners incl. MLP ----
 mdl=['Linear','MLP','CatBoost','RandomForest','XGBoost','LightGBM','SLSQP blend']
 r2=[0.568,0.626,0.641,0.644,0.647,0.649,0.654]
 fig,ax=plt.subplots(figsize=(7.5,4.6))
@@ -52,24 +70,15 @@ cols=['darkgreen' if 'blend' in m else 'steelblue' for m in mdl]
 ax.barh(mdl,r2,color=cols)
 for i,v in enumerate(r2): ax.text(v,i,f' {v:.3f}',va='center')
 ax.set_xlabel('Held-out test $R^2$'); ax.set_title('Model comparison (20% held-out test)'); ax.set_xlim(0.5,0.68)
-save(fig,'fig4_model_compare')
+save(fig,'fig5_model_compare')
 
-# ---- Fig 5: temporal robustness (A/B/C), six-learner blend incl. MLP in all three ----
+# ---- Fig 6: temporal robustness (A/B/C), six-learner blend incl. MLP in all three ----
 sc=['Setup A\n(Q4 2025)','Setup B\n(Q1 2026)','Setup C\n(Feb-Apr 2026)']; rr=[0.645,0.575,0.665]
 fig,ax=plt.subplots(figsize=(6.5,4.2))
 ax.bar(sc,rr,color=['steelblue','steelblue','darkgreen'])
 for i,v in enumerate(rr): ax.text(i,v,f'{v:.3f}',ha='center',va='bottom')
 ax.set_ylabel('Blend $R^2$ (5-fold CV)'); ax.set_title('Cross-period robustness'); ax.set_ylim(0,0.75)
-save(fig,'fig5_temporal')
-
-# ---- Fig 6: ablation (levers) ----
-lev=['Clean target','Deeper history','Tuning','Price feats','Review feats','Hurdle','Nbhd context']
-val=[0.040,0.012,0.002,0.000,0.000,0.000,0.000]
-fig,ax=plt.subplots(figsize=(7.5,4.2))
-ax.barh(lev[::-1],val[::-1],color=['seagreen' if v>0.005 else 'grey' for v in val[::-1]])
-for i,v in enumerate(val[::-1]): ax.text(v,i,f' +{v:.3f}',va='center')
-ax.set_xlabel('$\\Delta R^2$ contribution'); ax.set_title('Ablation: only the target and history help')
-save(fig,'fig6_ablation')
+save(fig,'fig6_temporal')
 
 # ---- Fig 7: residual diagnostics (Setup C blend OOF) ----
 # Sized for a double-column (full text-width, ~7in) placement in the manuscript --
@@ -121,6 +130,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import KFold, train_test_split
 from xgboost import XGBRegressor
+
 
 RS=42
 dfC = pd.read_parquet(OUT/'features_setupC.parquet')
@@ -201,5 +211,16 @@ ax.barh(labels9[::-1], vals9[::-1], color='seagreen')
 ax.set_xlabel('XGBoost gain importance (normalised)')
 ax.set_title('Top-18 features by XGBoost gain (Setup C)')
 fig.tight_layout(); save(fig,'fig9_importance')
+
+# ---- Fig 10: ablation (levers) ----
+lev=['Clean target','Deeper history','Tuning','Price feats','Review feats','Hurdle','Nbhd context']
+val=[0.040,0.012,0.002,0.000,0.000,0.000,0.000]
+fig,ax=plt.subplots(figsize=(7.5,4.2))
+ax.barh(lev[::-1],val[::-1],color=['seagreen' if v>0.005 else 'grey' for v in val[::-1]])
+for i,v in enumerate(val[::-1]): ax.text(v,i,f' +{v:.3f}',va='center')
+ax.set_xlabel('$\\Delta R^2$ contribution'); ax.set_title('Ablation: only the target and history help')
+ax.set_xlim(0, max(val)*1.4)
+save(fig,'fig10_ablation')
+
 
 print('paper2 figures done:', len(list(FG.glob('*.png'))), 'png')
